@@ -1,9 +1,19 @@
+#' A function
+#'
+#' @param data A data frame of HHs (more details)
+#' @param vectorofQuintiles A vector (more details)
+#' @param equity_file A data frame (more details)
+#'
+#' @return A data frame containing the equity scores and the equity quintiles for each household of data (first parameter)
+#'
+#' @importFrom magrittr %>%
+#' @export
 equity_calculation <- function(data, vectorOfQuintiles, equity_file){
 
   # Amended Equity Tool response data frame
-  df <- bind_rows(equity_file %>% dplyr::select(1, answer = 2, score = 3),
-                  equity_file %>% dplyr::select(1, answer = 4, score = 5),
-                  equity_file %>% dplyr::select(1, answer = 6, score = 7)) %>%
+  df <- dplyr::bind_rows(equity_file %>% dplyr::select(1, answer = 2, score = 3),
+                         equity_file %>% dplyr::select(1, answer = 4, score = 5),
+                         equity_file %>% dplyr::select(1, answer = 6, score = 7)) %>%
     stats::na.omit()
   names(df) <- c("question", "answer", "score")
   df <- df %>% dplyr::mutate(code = paste(question, answer, sep = " : "))
