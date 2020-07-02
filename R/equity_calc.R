@@ -4,8 +4,9 @@ equity_calculation <- function(data, vectorOfQuintiles, equity_file){
   df <- bind_rows(equity_file %>% dplyr::select(1, answer = 2, score = 3),
                   equity_file %>% dplyr::select(1, answer = 4, score = 5),
                   equity_file %>% dplyr::select(1, answer = 6, score = 7)) %>%
-    na.omit() %>%
-    mutate(code = paste(question, answer, sep = " : "))
+    stats::na.omit()
+  names(df) <- c("question", "answer", "score")
+  df <- df %>% dplyr::mutate(code = paste(question, answer, sep = " : "))
 
   # Compare equity df from survey to values and options
   if (!identical(sort(names(data)), sort(unique(df$question)))){
@@ -15,7 +16,7 @@ equity_calculation <- function(data, vectorOfQuintiles, equity_file){
   # Ensure answer codes are the same
   for (q_name in names(data)){
     if (!all(unique(data[[q_name]])[!is.na(unique(data[[q_name]]))] %in%
-             (df %>% filter(question == q_name) %>% .$answer))){
+             (df %>% dplyr::filter(question == q_name) %>% .$answer))){
       stop(sprintf("The answer codes for var %s in the Equity Answer df and the Scores df do not match", q_name))
     }
   }
@@ -27,7 +28,7 @@ equity_calculation <- function(data, vectorOfQuintiles, equity_file){
                                            ~ paste(rownames(equity_transpose), equity_transpose[, .x], sep = " : "))
 
   # Scores for the individual are the sum of the values the responses
-  score_vector <- map_dbl(equity_transpose_codes, ~ sum(df$score[match(.x, df$code)]))
+  score_vector <- purrr::map_dbl(equity_transpose_codes, ~ sum(df$score[match(.x, df$code)]))
 
   # Assign quintile based on vector of quintiles
   quintile_vector <- cut(score_vector, c(-Inf, vectorOfQuintiles, Inf), labels = c(1:5))
