@@ -22,3 +22,7 @@ Imports:
     stats,
     magrittr,
     tibble
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

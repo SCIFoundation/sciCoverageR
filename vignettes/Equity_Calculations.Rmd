@@ -1,0 +1,37 @@
+---
+title: "Equity_Calculations"
+author: "Mario Gronert"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Equity Calculations}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# Heading 1
+
+
+```{r pressure, echo=FALSE, fig.cap="A caption", out.width = '100%'}
+knitr::include_graphics("Z:/Publications & Projects/2020/2020_SCI_R_Package/et_website_civ.png")
+```
+
+Text
+
+Text
+
+```{r, echo=FALSE, fig.cap="A second caption", fig.topcaption=TRUE, out.width = '100%'}
+knitr::include_graphics("Z:/Publications & Projects/2020/2020_SCI_R_Package/Original_equity_tool output.png")
+```
+
+Text
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+#library(sciCoverageR)
+```
