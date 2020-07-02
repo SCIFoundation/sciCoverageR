@@ -16,7 +16,7 @@ equity_calculation <- function(data, vectorOfQuintiles, equity_file){
                          equity_file %>% dplyr::select(1, answer = 6, score = 7)) %>%
     stats::na.omit()
   names(df) <- c("question", "answer", "score")
-  df <- df %>% dplyr::mutate(code = paste(question, answer, sep = " : "))
+  df$code <- paste(df$question, df$answer, sep = " : ")
 
   # Compare equity df from survey to values and options
   if (!identical(sort(names(data)), sort(unique(df$question)))){
@@ -26,7 +26,7 @@ equity_calculation <- function(data, vectorOfQuintiles, equity_file){
   # Ensure answer codes are the same
   for (q_name in names(data)){
     if (!all(unique(data[[q_name]])[!is.na(unique(data[[q_name]]))] %in%
-             (df %>% dplyr::filter(question == q_name) %>% .$answer))){
+             tibble::deframe(df[df$question == q_name, 2]))){
       stop(sprintf("The answer codes for var %s in the Equity Answer df and the Scores df do not match", q_name))
     }
   }

@@ -20,4 +20,5 @@ Imports:
     dplyr,
     purrr,
     stats,
-    magrittr
+    magrittr,
+    tibble
