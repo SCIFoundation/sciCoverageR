@@ -9,9 +9,9 @@ equity_calculation(data, vectorOfQuintiles, equity_file)
 \arguments{
 \item{data}{A data frame of HHs (more details)}
 
-\item{equity_file}{A data frame (more details)}
+\item{vectorOfQuintiles}{A vector (more details)}
 
-\item{vectorofQuintiles}{A vector (more details)}
+\item{equity_file}{A data frame (more details)}
 }
 \value{
 A data frame containing the equity scores and the equity quintiles for each household of data (first parameter)

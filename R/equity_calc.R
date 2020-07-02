@@ -1,7 +1,7 @@
 #' A function
 #'
 #' @param data A data frame of HHs (more details)
-#' @param vectorofQuintiles A vector (more details)
+#' @param vectorOfQuintiles A vector (more details)
 #' @param equity_file A data frame (more details)
 #'
 #' @return A data frame containing the equity scores and the equity quintiles for each household of data (first parameter)
