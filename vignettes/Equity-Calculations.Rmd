@@ -74,6 +74,6 @@ Note that the order of the column (question, answer, score) needs to be followed
 Text
 
 ```{r}
-#data(civ_equity_tool_file_2017, package = "sciCoverageR")
-#head(civ_equity_tool_file_2017)
+data(civ_equity_tool_file_2017, package = "sciCoverageR")
+head(civ_equity_tool_file_2017)
 ```
