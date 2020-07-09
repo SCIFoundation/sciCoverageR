@@ -11,7 +11,7 @@ vignette: >
 ---
 
 ```{r, echo=FALSE}
-htmltools::img(src = knitr::image_uri("images/SCI Foundation_RGB_Navy_Long_red.jpg"),  
+htmltools::img(src = knitr::image_uri("images/SCI_Foundation_RGB_Navy_Long_red.jpg"),  
                alt = 'logo', 
                style = 'position: absolute; top: 0; right: 0; margin-right: 275px; padding:1px; border:1px; width: 322px; height: 65px')
 ```
@@ -35,7 +35,7 @@ Once filled out, you should quickly receive an email to the address provided wit
 <br>
 
 ```{r, echo=FALSE, fig.cap="Figure 2 - Equity Tool country Excel file", fig.topcaption=TRUE, out.width = '100%'}
-knitr::include_graphics("images/Original_equity_tool output_2.png")
+knitr::include_graphics("images/Original_equity_tool_output_2.png")
 ```
 
 <br>
@@ -69,3 +69,11 @@ knitr::include_graphics("images/adapted_equity_tool_simple.png")
 <br>
 Note that the order of the column (question, answer, score) needs to be followed for the calculation to work. The name of the columns (here: `question`, `op1`, `op1_s`, …) is irrelevant (i.e., names could be: `super`, `duper`, `varnames`, …)
 
+## Calculating the equity output
+
+Text
+
+```{r}
+#data(civ_equity_tool_file_2017, package = "sciCoverageR")
+#head(civ_equity_tool_file_2017)
+```
