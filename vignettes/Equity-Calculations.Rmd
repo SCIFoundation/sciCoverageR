@@ -13,7 +13,7 @@ vignette: >
 ```{r, echo=FALSE}
 htmltools::img(src = knitr::image_uri("images/SCI_Foundation_RGB_Navy_Long_red.jpg"),  
                alt = 'logo', 
-               style = 'position: absolute; top: 0; right: 0; margin-right: 275px; padding:1px; border:1px; width: 322px; height: 65px')
+               style = 'position: absolute; top: 0; right: 0; margin-right: 75px; padding:1px; border:1px; width: 322px; height: 65px')
 ```
 
 <br>
@@ -71,9 +71,48 @@ Note that the order of the column (question, answer, score) needs to be followed
 
 ## Calculating the equity output
 
-Text
+To calculate the equity scores and compute the equity quintiles we need three elements: the data containing the answers from the household respondents on the Equity Tool questions, the data containing the answer codes and associated scores and the vector of quintiles.
+
+The previous step showed how to amend the Equity Tool information and save it. Once the stripped-down version of the Excel file has been stored, it needs to be read in.
+
+<br>
 
 ```{r}
-data(civ_equity_tool_file_2017, package = "sciCoverageR")
-head(civ_equity_tool_file_2017)
+# equity_answers <- readxl::read_xlsx( [::Pathfile::] )
 ```
+
+<br>
+
+This package contains an example of hte file shown in `Figure 4`. If we call on it we can see the data frame contains the same information.
+
+<br>
+
+```{r}
+data(eq_answers, package = "sciCoverageR")
+head(eq_answers)
+```
+
+<br>
+
+This package further contains an example data frame for household answers from a coverage survey using the [WHO Coverage Evaluation Survey methodology](https://apps.who.int/iris/bitstream/handle/10665/329376/9789241516464-eng.pdf). We can see, it contains 2261 rows and 38 columns. The answers to the Equity Tool questions are stored in columns 9:19.
+
+<br>
+
+```{r}
+data(hh, package = "sciCoverageR")
+dim(hh)
+names(hh)
+```
+
+<br>
+
+Let us extract those columns into a separate data frame called `eq`. Additionally, for reasons that will become apparent soon, let us save `eq_2`, which by mistake also contains the 20th column.
+
+<br>
+
+```{r}
+eq <- hh[, 9:19]
+eq_2 <- hh[, 9:20]
+```
+
+<br>

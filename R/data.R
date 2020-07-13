@@ -65,4 +65,4 @@
 #' }
 #' @source Simplified data frame based on the \href{https://www.equitytool.org/cote-divoire}{Equity Tool Website's}
 #' form for the Ivory Coast. Requires requesting Excel Workbook to be sent. Based on the content in the "Other software" sheet.
-"civ_equity_tool_file_2017"
+"eq_answers"
