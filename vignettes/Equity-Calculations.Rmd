@@ -100,9 +100,9 @@ This package further contains an example data frame for household answers from a
 <br>
 
 ```{r}
-data(hh, package = "sciCoverageR")
-dim(hh)
-names(hh)
+data(vignette_hh, package = "sciCoverageR")
+dim(vignette_hh)
+names(vignette_hh)
 ```
 
 <br>
@@ -112,8 +112,8 @@ Let us extract those columns into a separate data frame called `eq`. Additionall
 <br>
 
 ```{r}
-eq <- hh[, 9:19]
-eq_2 <- hh[, 9:20]
+eq <- vignette_hh[, 9:19]
+eq_2 <- vignette_hh[, 9:20]
 voq <- c(-0.384090795, -0.3583393779, 0.111673076, 0.554555339)
 ```
 
@@ -183,6 +183,7 @@ This data frame respects the order from the respondents answers so the columns c
 ```{r, error=TRUE}
 result <- equity_calculation(data = eq, vectorOfQuintiles = voq, equity_file = eq_answers)
 dim(result)
-hh <- dplyr::bind_rows(hh, result)
+vignette_hh <- dplyr::bind_rows(vignette_hh, result)
+table(vignette_hh$quintiles)
 ```
 

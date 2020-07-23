@@ -45,7 +45,7 @@
 #'   \item{subunit_name}{u}
 #' }
 #' @source Anonymised and amended based on survey data from the SCI Foundation
-"hh"
+"vignette_hh"
 
 
 #' Ivory Coast Equity Tool Standard Questions.
