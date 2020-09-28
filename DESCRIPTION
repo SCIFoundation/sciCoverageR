@@ -22,7 +22,9 @@ Imports:
     stats,
     magrittr,
     tibble,
-    htmltools
+    htmltools,
+    survey,
+    rlang
 Suggests: 
     knitr,
     rmarkdown,
