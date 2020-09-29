@@ -139,9 +139,9 @@ result <- equity_calculation(data = eq_2, vectorOfQuintiles = voq, equity_file =
 
 <br>
 
-The funciton tells us that the error is that the column names of both data frames do not match.
+The function tells us that the error is that the column names of both data frames do not match since `eq_2` has one column more.
 
-Equally, the names of the columns need to agree, not only in number (`eq_2` had one column more than `eq`) but also in the exact wording. For example, the names of the questions are the following:
+The columns need to agree not only in number (`eq_2` had one column more than `eq`) but also in the exact wording. For example, the names of the questions are the following:
 
 <br>
 
