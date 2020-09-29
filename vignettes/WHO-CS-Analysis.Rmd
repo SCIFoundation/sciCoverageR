@@ -1,0 +1,122 @@
+---
+title: "WHO-CS-Analysis"
+output: 
+  rmarkdown::html_vignette:
+    keep_md: true
+    toc: true
+vignette: >
+  %\VignetteIndexEntry{WHO-CS-Analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, echo=FALSE}
+htmltools::img(src = knitr::image_uri("images/SCI_Foundation_RGB_Navy_Long_red.jpg"),  
+               alt = 'logo', 
+               style = 'position: absolute; top: 0; right: 0; margin-right: 75px; padding:1px; border:1px; width: 322px; height: 65px')
+```
+
+
+<br>
+This vignette details how to analyse data from a coverage survey based on the [WHO Coverage Survey Evaluation Methodology](https://apps.who.int/iris/bitstream/handle/10665/329376/9789241516464-eng.pdf).
+
+## Loading data file and prepping it
+
+We need to load the data and incorporate the survey design. This is individual to each survey.
+
+```{r}
+options(width = 100)
+library(sciCoverageR)
+data(vignette_ind, package = "sciCoverageR")
+dim(vignette_ind)
+tail(names(vignette_ind))
+
+# Add little error (for later)
+vignette_ind$ind_error_pzq_bin <- sample(0:2, nrow(vignette_ind), replace = T)
+```
+
+Set the design, some details not in the survey data
+
+```{r, message=FALSE}
+library(dplyr)
+library(survey)
+library(purrr)
+options(survey.lonely.psu = "certainty")
+# In each district, 30 subunits from a list of possible subunits
+vignette_ind$fpc_district <- case_when(vignette_ind$moh_1_label == "Health District A" ~ 234,
+                                       vignette_ind$moh_1_label == "Health District B" ~ 146,
+                                       vignette_ind$moh_1_label == "Health District C" ~ 94)
+```
+
+
+```{r}
+# Requires survey design
+design <- svydesign(ids =    ~ subunit_name + vil_segment_surveyed,
+                    strata = ~ moh_1_label + NULL,
+                    fpc =    ~ fpc_district + vil_segment_total,
+                    data = vignette_ind)
+design
+```
+
+
+## Using function - simple
+
+```{r}
+estimate_cs_values(var = "ind_offered_pzq_bin", iu = "moh_1_label", design = design)
+```
+
+## Using function - expanded options
+
+```{r}
+estimate_cs_values(var = "ind_offered_pzq_bin", iu = "moh_1_label", design = design, level = 0.9, degf = Inf)
+```
+
+## Using function - error flagging
+
+<br>
+Variable is not coded 0 / 1 (or missing) as expected
+```{r, error=TRUE}
+estimate_cs_values(var = "ind_error_pzq_bin", iu = "moh_1_label", design = design)
+```
+
+<br>
+Variable is not one of the variables of interest (reach or coverage of a drug)
+```{r, error=TRUE}
+estimate_cs_values(var = "ind_sens_bin", iu = "moh_1_label", design = design)
+```
+
+<br>
+Group info is coded as a string and not as per data dictionary
+```{r, error=TRUE}
+alternative <- vignette_ind
+alternative$ind_group <- case_when(alternative$ind_group == 1 ~ "SAC",
+                                   alternative$ind_group == 2 ~ "Adults")
+
+alt_design <- svydesign(ids =    ~ subunit_name + vil_segment_surveyed,
+                    strata = ~ moh_1_label + NULL,
+                    fpc =    ~ fpc_district + vil_segment_total,
+                    data = alternative)
+estimate_cs_values(var = "ind_offered_pzq_bin", iu = "moh_1_label", design = alt_design)
+```
+
+<br>
+Group info is coded as in a differently named variable (e.g. ind_sac, coded as 0 no and 1 yes)
+```{r, error=TRUE}
+alternative <- vignette_ind
+alternative$ind_sac <- alternative$ind_group - 1
+alternative$ind_group <- NULL
+
+alt_design <- svydesign(ids =    ~ subunit_name + vil_segment_surveyed,
+                    strata = ~ moh_1_label + NULL,
+                    fpc =    ~ fpc_district + vil_segment_total,
+                    data = alternative)
+estimate_cs_values(var = "ind_offered_pzq_bin", iu = "moh_1_label", design = alt_design)
+```
+
+## Using function - Purrrfect
+
+```{r}
+# Using the fact that the first element is var
+vars <- list(reach = "ind_offered_pzq_bin", coverage = "ind_swallow_pzq_bin")
+map_dfr(vars, estimate_cs_values, iu = "moh_1_label", design = design, .id = "question")
+```

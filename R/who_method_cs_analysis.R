@@ -55,16 +55,16 @@ estimate_cs_values <- function(var, iu, design, level = 0.95, degf = NA){
     # For SAC, calculate overall result, by sex, and by attendance, give uniformity
     sac_all <- short_svyby(formula_var, formula_iu, design, group, level = level, degf = degf) %>%
       dplyr::mutate(!!sex := NA, !! attendance := NA, !!drug := drug_name, by = "overall") %>%
-      dplyr::select(area = 1, drug, sex, attendance, by, estimate = 2, lower = 3, upper = 4)
+      dplyr::select(area = 1, drug, by, sex, attendance, estimate = 2, lower = 3, upper = 4)
 
 
-    sac_sex <- short_svyby(formula_var, formula_iu, design, group, level = level, degf = degf) %>%
+    sac_sex <- short_svyby(formula_var, formula_iu_sex, design, group, level = level, degf = degf) %>%
       dplyr::mutate(!!attendance := NA, !!drug := drug_name, by = "sex") %>%
-      dplyr::select(area = 1, drug, sex = 2, attendance, by, estimate = 3, lower = 4, upper = 5)
+      dplyr::select(area = 1, drug, by, sex = 2, attendance, estimate = 3, lower = 4, upper = 5)
 
-    sac_att <- short_svyby(formula_var, formula_iu, design, group, level = level, degf = degf) %>%
+    sac_att <- short_svyby(formula_var, formula_iu_att, design, group, level = level, degf = degf) %>%
       dplyr::mutate(!!sex := NA, !!drug := drug_name, by = "attendance") %>%
-      dplyr::select(area = 1, drug, sex, attendance = 2, by, estimate = 3, lower = 4, upper = 5)
+      dplyr::select(area = 1, drug, by, sex, attendance = 2, estimate = 3, lower = 4, upper = 5)
 
     sac <- rbind(sac_all, sac_sex, sac_att) %>% dplyr::mutate(group = "SAC") %>% dplyr::select(1,9,2:8)
 
@@ -80,12 +80,12 @@ estimate_cs_values <- function(var, iu, design, level = 0.95, degf = NA){
     # For adults, calculate overall result and sex, give uniformity
     adu_all <- short_svyby(formula_var, formula_iu, design, group, level = level, degf = degf) %>%
       dplyr::mutate(!!sex := NA, !!attendance := NA, !!drug := drug_name, by = "overall") %>%
-      dplyr::select(area = 1, drug, sex, attendance, by, estimate = 2, lower = 3, upper = 4)
+      dplyr::select(area = 1, drug, by, sex, attendance, estimate = 2, lower = 3, upper = 4)
 
 
-    adu_sex <- short_svyby(formula_var, formula_iu, design, group, level = level, degf = degf) %>%
+    adu_sex <- short_svyby(formula_var, formula_iu_sex, design, group, level = level, degf = degf) %>%
       dplyr::mutate(!!attendance := NA, !!drug := drug_name, by = "sex") %>%
-      dplyr::select(area = 1, drug, sex = 2, attendance, by, estimate = 3, lower = 4, upper = 5)
+      dplyr::select(area = 1, drug, by, sex = 2, attendance, estimate = 3, lower = 4, upper = 5)
 
     adu <- rbind(adu_all, adu_sex) %>% dplyr::mutate(group = "adults") %>% dplyr::select(1,9,2:8)
 
