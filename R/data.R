@@ -1,4 +1,4 @@
-#' Individual data from a survey of SACs from 2261 households in the Ivory Coast.
+#' Individual data from a survey of SAC from 2261 households in the Ivory Coast.
 #'
 #' A dataset containing household and individual (ind) level information from a coverage survey in three health districts
 #' in the Ivory Coast following the

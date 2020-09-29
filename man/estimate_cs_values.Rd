@@ -4,7 +4,7 @@
 \alias{estimate_cs_values}
 \title{A function to obtain binary var (e.g., coverage: yes / no) estimates with CI from WHO method CS clean data.}
 \usage{
-estimate_cs_values(var, iu, design)
+estimate_cs_values(var, iu, design, level = 0.95, degf = NA)
 }
 \arguments{
 \item{var}{A string denoting the name of the variable to analyse.}
@@ -12,6 +12,10 @@ estimate_cs_values(var, iu, design)
 \item{iu}{A string denoting the name of the variable to use for administrative disaggregation .}
 
 \item{design}{A survey package design object.}
+
+\item{level}{Confidence level for interval}
+
+\item{degf}{Degrees of freedom. By default NA, which call uses the svyciprop default \code{defg(design)} evaluation (see svyciprop documentation). For user inputted degrees of freedom enter a positive integer.}
 }
 \value{
 A data frame containing the survey estimates for the inputted variable over the inputted administrative disaggregation (commonly the implementation unit) for the survey groups (SAC and/or adults) over all individuals, disaggregated by sex and (for SAC) by school attendance.

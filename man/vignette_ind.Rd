@@ -3,7 +3,7 @@
 \docType{data}
 \name{vignette_ind}
 \alias{vignette_ind}
-\title{Individual data from a survey of SACs from 2261 households in the Ivory Coast.}
+\title{Individual data from a survey of SAC from 2261 households in the Ivory Coast.}
 \format{
 A data frame with 4929 rows and 79 columns:
 \describe{

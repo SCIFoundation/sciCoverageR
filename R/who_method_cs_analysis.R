@@ -3,13 +3,15 @@
 #' @param var A string denoting the name of the variable to analyse.
 #' @param iu A string denoting the name of the variable to use for administrative disaggregation .
 #' @param design A survey package design object.
+#' @param level Confidence level for interval
+#' @param degf Degrees of freedom. By default NA, which call uses the svyciprop default `defg(design)` evaluation (see svyciprop documentation). For user inputted degrees of freedom enter a positive integer.
 #'
 #' @return A data frame containing the survey estimates for the inputted variable over the inputted administrative disaggregation (commonly the implementation unit) for the survey groups (SAC and/or adults) over all individuals, disaggregated by sex and (for SAC) by school attendance.
 #'
 #' @importFrom magrittr %>%
 #' @importFrom rlang :=
 #' @export
-estimate_cs_values <- function(var, iu, design){
+estimate_cs_values <- function(var, iu, design, level = 0.95, degf = NA){
 
   #==================================================================================#
   # Step 1 - Do argument checking -----------------------------------------
@@ -49,21 +51,19 @@ estimate_cs_values <- function(var, iu, design){
 
   if (1 %in% survey_groups){
 
+    group <- 1
     # For SAC, calculate overall result, by sex, and by attendance, give uniformity
-    sac_all <- survey::svyby(formula_var, formula_iu, design = subset(design, ind_group == 1),
-                             survey::svyciprop, vartype = "ci", method = "logit", na.rm = T) %>%
-      tibble::remove_rownames() %>% dplyr::mutate(!!sex := NA, !! attendance := NA, !!drug := drug_name, by = "overall") %>%
+    sac_all <- short_svyby(formula_var, formula_iu, design, group, level = level, degf = degf) %>%
+      dplyr::mutate(!!sex := NA, !! attendance := NA, !!drug := drug_name, by = "overall") %>%
       dplyr::select(area = 1, drug, sex, attendance, by, estimate = 2, lower = 3, upper = 4)
 
 
-    sac_sex <- survey::svyby(formula_var, formula_iu_sex, design = subset(design, ind_group == 1),
-                             survey::svyciprop, vartype = "ci", method = "logit", na.rm = T) %>%
-      tibble::remove_rownames() %>% dplyr::mutate(!!attendance := NA, !!drug := drug_name, by = "sex") %>%
+    sac_sex <- short_svyby(formula_var, formula_iu, design, group, level = level, degf = degf) %>%
+      dplyr::mutate(!!attendance := NA, !!drug := drug_name, by = "sex") %>%
       dplyr::select(area = 1, drug, sex = 2, attendance, by, estimate = 3, lower = 4, upper = 5)
 
-    sac_att <- survey::svyby(formula_var, formula_iu_att, design = subset(design, ind_group == 1),
-                             survey::svyciprop, vartype = "ci", method = "logit", na.rm = T) %>%
-      tibble::remove_rownames() %>% dplyr::mutate(!!sex := NA, !!drug := drug_name, by = "attendance") %>%
+    sac_att <- short_svyby(formula_var, formula_iu, design, group, level = level, degf = degf) %>%
+      dplyr::mutate(!!sex := NA, !!drug := drug_name, by = "attendance") %>%
       dplyr::select(area = 1, drug, sex, attendance = 2, by, estimate = 3, lower = 4, upper = 5)
 
     sac <- rbind(sac_all, sac_sex, sac_att) %>% dplyr::mutate(group = "SAC") %>% dplyr::select(1,9,2:8)
@@ -76,16 +76,15 @@ estimate_cs_values <- function(var, iu, design){
 
   if (2 %in% survey_groups){
 
+    group <- 2
     # For adults, calculate overall result and sex, give uniformity
-    adu_all <- survey::svyby(formula_var, formula_iu, design = subset(design, ind_group == 2),
-                             survey::svyciprop, vartype = "ci", method = "logit", na.rm = T) %>%
-      tibble::remove_rownames() %>% dplyr::mutate(!!sex := NA, !!attendance := NA, !!drug := drug_name, by = "overall") %>%
+    adu_all <- short_svyby(formula_var, formula_iu, design, group, level = level, degf = degf) %>%
+      dplyr::mutate(!!sex := NA, !!attendance := NA, !!drug := drug_name, by = "overall") %>%
       dplyr::select(area = 1, drug, sex, attendance, by, estimate = 2, lower = 3, upper = 4)
 
 
-    adu_sex <- survey::svyby(formula_var, formula_iu_sex, design = subset(design, ind_group == 2),
-                             survey::svyciprop, vartype = "ci", method = "logit", na.rm = T) %>%
-      tibble::remove_rownames() %>% dplyr::mutate(!!attendance := NA, !!drug := drug_name, by = "sex") %>%
+    adu_sex <- short_svyby(formula_var, formula_iu, design, group, level = level, degf = degf) %>%
+      dplyr::mutate(!!attendance := NA, !!drug := drug_name, by = "sex") %>%
       dplyr::select(area = 1, drug, sex = 2, attendance, by, estimate = 3, lower = 4, upper = 5)
 
     adu <- rbind(adu_all, adu_sex) %>% dplyr::mutate(group = "adults") %>% dplyr::select(1,9,2:8)
@@ -197,4 +196,27 @@ evaluate_args <- function(var, iu, design){
   if(!(class(design)[2] == "survey.design")) stop("Your design object is not a survey package design object")
 
 }
+
+#==================================================================================#
+# Add - survey shorthand ------
+#==================================================================================#
+
+short_svyby <- function(formula_var, formula_iu, design, group, level = level, degf = degf) {
+
+  if (is.na(degf)){
+
+    survey::svyby(formula_var, formula_iu, design = subset(design, ind_group == group),
+                  survey::svyciprop, vartype = "ci", method = "logit", na.rm = T, level = level) %>%
+      tibble::remove_rownames()
+
+  } else {
+
+    survey::svyby(formula_var, formula_iu, design = subset(design, ind_group == group),
+                  survey::svyciprop, vartype = "ci", method = "logit", na.rm = T, level = level, df = degf) %>%
+      tibble::remove_rownames()
+
+  }
+
+}
+
 
