@@ -16,44 +16,63 @@ htmltools::img(src = knitr::image_uri("images/SCI_Foundation_RGB_Navy_Long_red.j
                style = 'position: absolute; top: 0; right: 0; margin-right: 75px; padding:1px; border:1px; width: 322px; height: 65px')
 ```
 
+```{r, include = FALSE}
+options(width = 100)
+```
 
 <br>
-This vignette details how to analyse data from a coverage survey based on the [WHO Coverage Survey Evaluation Methodology](https://apps.who.int/iris/bitstream/handle/10665/329376/9789241516464-eng.pdf).
+This vignette details how to perform the standard analysis calculations for a coverage survey which has followed the [WHO Coverage Survey Evaluation Methodology](https://apps.who.int/iris/bitstream/handle/10665/329376/9789241516464-eng.pdf).
 
-## Loading data file and prepping it
+## Loading data, libraries and setting options
 
-We need to load the data and incorporate the survey design. This is individual to each survey.
+Before starting we need to call the necessary `R` libraries as well as the underlying data. The `sciCoverageR` package contains a data frame called `vignette_ind` exemplifying data from a WHO Coverage Evaluation Survey methodology survey.  It contains 4929 rows, representing the individuals interviewed and 80 columns.
 
-```{r}
-options(width = 100)
+```{r, results='hide', message = FALSE}
+# Load libraries
 library(sciCoverageR)
+library(dplyr)
+library(survey)
+library(purrr)
+```
+
+```{r, warning = FALSE}
+# Load data, examine dimensions, look at 
 data(vignette_ind, package = "sciCoverageR")
 dim(vignette_ind)
-tail(names(vignette_ind))
+```
 
+What the variables contain and how they are coded is recorded in the SCIF data dictionary for a CES. See the data dictionary for more details about the variables. In this example survey, only SAC were interviewed (the only response to `ind_group` is `1`) and only about Praziquantel (there are no variables about being offered or having swallowed `alb`).
+
+```{r}
+# Variable names contained in the example data file
+names(vignette_ind)
+
+# Check the answer codes to ind_group
+unique(vignette_ind$ind_group)
+```
+
+Before moving on, we will add an additional erroneous column. The variables containing information on being offered and taking drugs are binary yes/no questions that, following the data dictionary are coded as `0` if no, `1` if yes. The only other possible answer is `NA` for a missing value (e.g., if the individual refused to participate).
+
+We will add a column with values `0`, `1`, and `2`. This will be used to showcase the error detection of the calculation functions.
+
+```{r}
 # Add little error (for later)
 vignette_ind$ind_error_pzq_bin <- sample(0:2, nrow(vignette_ind), replace = T)
 ```
 
-Set the design, some details not in the survey data
+## Include additional information and set survey design
 
-```{r, message=FALSE}
-library(dplyr)
-library(survey)
-library(purrr)
-options(survey.lonely.psu = "certainty")
-# In each district, 30 subunits from a list of possible subunits
-vignette_ind$fpc_district <- case_when(vignette_ind$moh_1_label == "Health District A" ~ 234,
-                                       vignette_ind$moh_1_label == "Health District B" ~ 146,
-                                       vignette_ind$moh_1_label == "Health District C" ~ 94)
-```
+The subunits selected from each of the three implementation units (IUs) in the sample data, were chosen using the [Coverage Survey Builder]( https://www.ntdsupport.org/sites/default/files/uploads/docs/resources/Coverage%20Survey%20Builder_v2.11.xls), choosing 30 subunits per IU. In this example dataset the IU is the health district, captured by the `moh_1` variables. The second stage of sampling is selecting the households in the segment, while the third stage is selecting the individuals. In the case of the CES methodology all individuals in a chosen household ought to be selected.
 
+In order to analyse the survey data, the survey design needs to be inputted. This is done using the `svydesign` function of the previously loaded `survey` package. The `svydesign` function allows for setting of a finite population correction (fpc) factor at each sampling stage. This is not done here for simplicity. Generally speaking, the design of the survey may vary and thus setting the design is not automatised but should be entered by hand and thought about by the analyst assigned to the survey.  
+
+A discussion about the use of different survey designs is beyond the scope of this vignette. It should be just noted that on page 27, [the WHO CES guidance](https://apps.who.int/iris/bitstream/handle/10665/329376/9789241516464-eng.pdf) claims that:
+
+> _Because the survey methodology employed produces an equal probability sample,  sample  estimates  can  be  calculated  without  the  use  of  sample  weights._
 
 ```{r}
 # Requires survey design
-design <- svydesign(ids =    ~ subunit_name + vil_segment_surveyed,
-                    strata = ~ moh_1_label + NULL,
-                    fpc =    ~ fpc_district + vil_segment_total,
+design <- svydesign(ids =    ~ segment_name + KEY_hh + KEY_ind,
                     data = vignette_ind)
 design
 ```
@@ -61,14 +80,42 @@ design
 
 ## Using function - simple
 
-```{r}
-estimate_cs_values(var = "ind_offered_pzq_bin", iu = "moh_1_label", design = design)
+Once the design is set, the survey coverage and reach can be calculated using the package’s own `estimate_cs_values` function. It takes three arguments: 
+
+1. `var` which codes the binary variable of interest: e.g., answers to whether the individual was offered Praziquantel (`ind_offered_pzq_bin`) or whether the individual swallowed Albendazole (`ind_swallow_alb_bin`).
+
+2. `part` which codes by which variable the data should be partitioned. This should commonly be the IU.
+
+3. `design` which is the `survey` design object created by the user for this survey.
+
+Using the just create `design` object, partitioning by the Health District (`moh_1_label`) to obtain the estimate of the survey reach for PZQ we just need to input the relevant variables into the function:
+
+```{r, results='hide', warning = FALSE}
+estimate_cs_values(var = "ind_offered_pzq_bin", part = "moh_1_label", design = design)
 ```
+
+The first thing to note is that the output will, in the case of this data set, generate a warning denoting the algorithm has not converged. This is generally something worth investigating but nothing to worry in this case. The algorithm will not be able to calculate confidence intervals if all answers are alike. So if within one subgroup (here, SAC who attend school in Health District C - row 15) all have the same answer (here, all were indeed offered PZQ), the algorithm fails and simply sets estimate, lower CI, and upper CI to the value in question (here, 1).
+
+```{r, results='hide', echo=FALSE}
+estimate_cs_values(var = "ind_offered_pzq_bin", part = "moh_1_label", design = design)
+```
+
+```{r, echo=FALSE, warning = FALSE}
+estimate_cs_values(var = "ind_offered_pzq_bin", part = "moh_1_label", design = design)
+```
+
+Comment output
+
+
+```{r}
+estimate_cs_values(var = "ind_offered_pzq_bin", part = "admin_1_label", design = design)
+```
+
 
 ## Using function - expanded options
 
 ```{r}
-estimate_cs_values(var = "ind_offered_pzq_bin", iu = "moh_1_label", design = design, level = 0.9, degf = Inf)
+estimate_cs_values(var = "ind_offered_pzq_bin", part = "moh_1_label", design = design, level = 0.9, degf = Inf)
 ```
 
 ## Using function - error flagging
@@ -76,47 +123,47 @@ estimate_cs_values(var = "ind_offered_pzq_bin", iu = "moh_1_label", design = des
 <br>
 Variable is not coded 0 / 1 (or missing) as expected
 ```{r, error=TRUE}
-estimate_cs_values(var = "ind_error_pzq_bin", iu = "moh_1_label", design = design)
+#estimate_cs_values(var = "ind_error_pzq_bin", part = "moh_1_label", design = design)
 ```
 
 <br>
 Variable is not one of the variables of interest (reach or coverage of a drug)
 ```{r, error=TRUE}
-estimate_cs_values(var = "ind_sens_bin", iu = "moh_1_label", design = design)
+#estimate_cs_values(var = "ind_sens_bin", part = "moh_1_label", design = design)
 ```
 
 <br>
 Group info is coded as a string and not as per data dictionary
 ```{r, error=TRUE}
-alternative <- vignette_ind
-alternative$ind_group <- case_when(alternative$ind_group == 1 ~ "SAC",
-                                   alternative$ind_group == 2 ~ "Adults")
+#alternative <- vignette_ind
+#alternative$ind_group <- case_when(alternative$ind_group == 1 ~ "SAC",
+#                                   alternative$ind_group == 2 ~ "Adults")
 
-alt_design <- svydesign(ids =    ~ subunit_name + vil_segment_surveyed,
-                    strata = ~ moh_1_label + NULL,
-                    fpc =    ~ fpc_district + vil_segment_total,
-                    data = alternative)
-estimate_cs_values(var = "ind_offered_pzq_bin", iu = "moh_1_label", design = alt_design)
+#alt_design <- svydesign(ids =    ~ subunit_name + vil_segment_surveyed,
+#                    strata = ~ moh_1_label + NULL,
+#                    fpc =    ~ fpc_district + vil_segment_total,
+#                    data = alternative)
+#estimate_cs_values(var = "ind_offered_pzq_bin", part = "moh_1_label", design = alt_design)
 ```
 
 <br>
 Group info is coded as in a differently named variable (e.g. ind_sac, coded as 0 no and 1 yes)
 ```{r, error=TRUE}
-alternative <- vignette_ind
-alternative$ind_sac <- alternative$ind_group - 1
-alternative$ind_group <- NULL
+#alternative <- vignette_ind
+#alternative$ind_sac <- alternative$ind_group - 1
+#alternative$ind_group <- NULL
 
-alt_design <- svydesign(ids =    ~ subunit_name + vil_segment_surveyed,
-                    strata = ~ moh_1_label + NULL,
-                    fpc =    ~ fpc_district + vil_segment_total,
-                    data = alternative)
-estimate_cs_values(var = "ind_offered_pzq_bin", iu = "moh_1_label", design = alt_design)
+#alt_design <- svydesign(ids =    ~ subunit_name + vil_segment_surveyed,
+#                    strata = ~ moh_1_label + NULL,
+#                    fpc =    ~ fpc_district + vil_segment_total,
+#                    data = alternative)
+#estimate_cs_values(var = "ind_offered_pzq_bin", part = "moh_1_label", design = alt_design)
 ```
 
 ## Using function - Purrrfect
 
 ```{r}
 # Using the fact that the first element is var
-vars <- list(reach = "ind_offered_pzq_bin", coverage = "ind_swallow_pzq_bin")
-map_dfr(vars, estimate_cs_values, iu = "moh_1_label", design = design, .id = "question")
+#vars <- list(reach = "ind_offered_pzq_bin", coverage = "ind_swallow_pzq_bin")
+#map_dfr(vars, estimate_cs_values, part = "moh_1_label", design = design, .id = "question")
 ```

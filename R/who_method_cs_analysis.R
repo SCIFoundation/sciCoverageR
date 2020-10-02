@@ -1,7 +1,7 @@
 #' A function to obtain binary var (e.g., coverage: yes / no) estimates with CI from WHO method CS clean data.
 #'
 #' @param var A string denoting the name of the variable to analyse.
-#' @param iu A string denoting the name of the variable to use for administrative disaggregation .
+#' @param part A string denoting the name of the variable to use for partitioning the data .
 #' @param design A survey package design object.
 #' @param level Confidence level for interval
 #' @param degf Degrees of freedom. By default NA, which call uses the svyciprop default `defg(design)` evaluation (see svyciprop documentation). For user inputted degrees of freedom enter a positive integer.
@@ -11,14 +11,14 @@
 #' @importFrom magrittr %>%
 #' @importFrom rlang :=
 #' @export
-estimate_cs_values <- function(var, iu, design, level = 0.95, degf = NA){
+estimate_cs_values <- function(var, part, design, level = 0.95, degf = NA){
 
   #==================================================================================#
   # Step 1 - Do argument checking -----------------------------------------
   #==================================================================================#
 
   # Do argument checking
-  evaluate_args(var = var, iu = iu, design = design)
+  evaluate_args(var = var, part = part, design = design)
   evaluate_drug_name(var = var, df = design$variables)
   # Last evaluates and creates object survey_groups
   survey_groups <- evaluate_df(df = design$variables)
@@ -28,71 +28,89 @@ estimate_cs_values <- function(var, iu, design, level = 0.95, degf = NA){
   #==================================================================================#
 
   formula_var <- stats::as.formula(paste0("~", var))
-  formula_iu <- stats::as.formula(paste0("~", iu))
+  formula_part <- stats::as.formula(paste0("~", part))
 
-  formula_iu_sex <- stats::as.formula(paste0("~", iu, "+ ind_sex"))
-  formula_iu_att <- stats::as.formula(paste0("~", iu, "+ ind_child_attendance"))
+  formula_part_sex <- stats::as.formula(paste0("~", part, "+ ind_sex"))
+  formula_part_att <- stats::as.formula(paste0("~", part, "+ ind_child_attendance"))
 
   drug_name <- toupper(gsub('^(ind_)(.+)(_{1})(.+)(_bin)$',"\\4", var))
 
+  # Convert strings to rlang sym objects to pass them thorugh piping, dplyr objects
   sex <- rlang::sym("sex")
   attendance <- rlang::sym("attendance")
   drug <- rlang::sym("drug")
 
+  var_sym <- rlang::sym(var)
+  part_sym <- rlang::sym(part)
+
   #==================================================================================#
-  # Step 3 - Go through groups --------------------------------------------
+  # Step 3 - Reduce design to relevant partitions ------------------------------------
+  #==================================================================================#
+
+  # Certain partitions may be available to one variable but not to another. For example, a survey may be for PZQ in 2
+  # IUs, but only in one of them for ALB. In that case, all ALB var answers in the other partition are missing (NA).
+  # Inversely, none is not NA. Use this to reduce the design to the relevant partitions
+
+  relevant_partitions <- design$variables %>%
+    dplyr::group_by(!!part_sym) %>% dplyr::summarise(count = sum(!is.na(!!var_sym))) %>%
+    dplyr::filter(count > 0) %>% dplyr::pull(!!part_sym)
+
+  design_f <- subset(design, eval(rlang::expr(!!part_sym)) %in% relevant_partitions)
+
+  #==================================================================================#
+  # Step 4 - Go through groups --------------------------------------------
   #==================================================================================#
 
   # Go through each group. If one is missing it is skipped.
 
   #==================================================================================#
-  # Step 3.1 - Go through SAC --------------------------------------------
+  # Step 4.1 - Go through SAC --------------------------------------------
   #==================================================================================#
 
   if (1 %in% survey_groups){
 
     group <- 1
     # For SAC, calculate overall result, by sex, and by attendance, give uniformity
-    sac_all <- short_svyby(formula_var, formula_iu, design, group, level = level, degf = degf) %>%
+    sac_all <- short_svyby(formula_var, formula_part, design = design_f, group, level = level, degf = degf) %>%
       dplyr::mutate(!!sex := NA, !! attendance := NA, !!drug := drug_name, by = "overall") %>%
-      dplyr::select(area = 1, drug, by, sex, attendance, estimate = 2, lower = 3, upper = 4)
+      dplyr::select(partition = 1, drug, by, sex, attendance, estimate = 2, lower = 3, upper = 4)
 
 
-    sac_sex <- short_svyby(formula_var, formula_iu_sex, design, group, level = level, degf = degf) %>%
+    sac_sex <- short_svyby(formula_var, formula_part_sex, design = design_f, group, level = level, degf = degf) %>%
       dplyr::mutate(!!attendance := NA, !!drug := drug_name, by = "sex") %>%
-      dplyr::select(area = 1, drug, by, sex = 2, attendance, estimate = 3, lower = 4, upper = 5)
+      dplyr::select(partition = 1, drug, by, sex = 2, attendance, estimate = 3, lower = 4, upper = 5)
 
-    sac_att <- short_svyby(formula_var, formula_iu_att, design, group, level = level, degf = degf) %>%
+    sac_att <- short_svyby(formula_var, formula_part_att, design = design_f, group, level = level, degf = degf) %>%
       dplyr::mutate(!!sex := NA, !!drug := drug_name, by = "attendance") %>%
-      dplyr::select(area = 1, drug, by, sex, attendance = 2, estimate = 3, lower = 4, upper = 5)
+      dplyr::select(partition = 1, drug, by, sex, attendance = 2, estimate = 3, lower = 4, upper = 5)
 
     sac <- rbind(sac_all, sac_sex, sac_att) %>% dplyr::mutate(group = "SAC") %>% dplyr::select(1,9,2:8)
 
   }
 
   #==================================================================================#
-  # Step 3.2 - Go through Adults --------------------------------------------
+  # Step 4.2 - Go through Adults --------------------------------------------
   #==================================================================================#
 
   if (2 %in% survey_groups){
 
     group <- 2
     # For adults, calculate overall result and sex, give uniformity
-    adu_all <- short_svyby(formula_var, formula_iu, design, group, level = level, degf = degf) %>%
+    adu_all <- short_svyby(formula_var, formula_part, design = design_f, group, level = level, degf = degf) %>%
       dplyr::mutate(!!sex := NA, !!attendance := NA, !!drug := drug_name, by = "overall") %>%
-      dplyr::select(area = 1, drug, by, sex, attendance, estimate = 2, lower = 3, upper = 4)
+      dplyr::select(partition = 1, drug, by, sex, attendance, estimate = 2, lower = 3, upper = 4)
 
 
-    adu_sex <- short_svyby(formula_var, formula_iu_sex, design, group, level = level, degf = degf) %>%
+    adu_sex <- short_svyby(formula_var, formula_part_sex, design = design_f, group, level = level, degf = degf) %>%
       dplyr::mutate(!!attendance := NA, !!drug := drug_name, by = "sex") %>%
-      dplyr::select(area = 1, drug, by, sex = 2, attendance, estimate = 3, lower = 4, upper = 5)
+      dplyr::select(partition = 1, drug, by, sex = 2, attendance, estimate = 3, lower = 4, upper = 5)
 
     adu <- rbind(adu_all, adu_sex) %>% dplyr::mutate(group = "adults") %>% dplyr::select(1,9,2:8)
 
   }
 
   #==================================================================================#
-  # Step 4 - Bind and output --------------------------------------------
+  # Step 5 - Bind and output --------------------------------------------
   #==================================================================================#
 
   if (all(1:2 %in% survey_groups)){ # Both present
@@ -184,13 +202,13 @@ evaluate_df <- function(df){
 # Add - Check the arguments to the function ------
 #==================================================================================#
 
-evaluate_args <- function(var, iu, design){
+evaluate_args <- function(var, part, design){
 
   # Check var is string
   if (!(is.character(var) & length(var) == 1)) stop("The name of the variable to analyse is not a simple, length one string")
 
-  # Check var iu string
-  if (!(is.character(iu) & length(iu) == 1)) stop("The name of the variable of the IU is not a simple, length one string")
+  # Check var part string
+  if (!(is.character(part) & length(part) == 1)) stop("The name of the variable of the partition is not a simple, length one string")
 
   # Check design object
   if(!(class(design)[2] == "survey.design")) stop("Your design object is not a survey package design object")
@@ -201,17 +219,17 @@ evaluate_args <- function(var, iu, design){
 # Add - survey shorthand ------
 #==================================================================================#
 
-short_svyby <- function(formula_var, formula_iu, design, group, level = level, degf = degf) {
+short_svyby <- function(formula_var, formula_part, design, group, level = level, degf = degf) {
 
   if (is.na(degf)){
 
-    survey::svyby(formula_var, formula_iu, design = subset(design, ind_group == group),
+    survey::svyby(formula_var, formula_part, design = subset(design, ind_group == group),
                   survey::svyciprop, vartype = "ci", method = "logit", na.rm = T, level = level) %>%
       tibble::remove_rownames()
 
   } else {
 
-    survey::svyby(formula_var, formula_iu, design = subset(design, ind_group == group),
+    survey::svyby(formula_var, formula_part, design = subset(design, ind_group == group),
                   survey::svyciprop, vartype = "ci", method = "logit", na.rm = T, level = level, df = degf) %>%
       tibble::remove_rownames()
 

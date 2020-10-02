@@ -4,12 +4,12 @@
 \alias{estimate_cs_values}
 \title{A function to obtain binary var (e.g., coverage: yes / no) estimates with CI from WHO method CS clean data.}
 \usage{
-estimate_cs_values(var, iu, design, level = 0.95, degf = NA)
+estimate_cs_values(var, part, design, level = 0.95, degf = NA)
 }
 \arguments{
 \item{var}{A string denoting the name of the variable to analyse.}
 
-\item{iu}{A string denoting the name of the variable to use for administrative disaggregation .}
+\item{part}{A string denoting the name of the variable to use for partitioning the data .}
 
 \item{design}{A survey package design object.}
 

@@ -5,7 +5,7 @@
 \alias{vignette_ind}
 \title{Individual data from a survey of SAC from 2261 households in the Ivory Coast.}
 \format{
-A data frame with 4929 rows and 79 columns:
+A data frame with 4929 rows and 80 columns:
 \describe{
 \item{admin_1_code}{t}
 \item{admin_1_name}{t}
@@ -17,6 +17,7 @@ A data frame with 4929 rows and 79 columns:
 \item{moh_1_name}{u}
 \item{moh_1_label}{u}
 \item{subunit_name}{u}
+\item{segment_name}{u}
 \item{vil_segment_surveyed}{u}
 \item{vil_segment_total}{u}
 \item{hh_house_number}{u}

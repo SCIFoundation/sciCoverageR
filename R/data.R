@@ -4,7 +4,7 @@
 #' in the Ivory Coast following the
 #' \href{https://apps.who.int/iris/bitstream/handle/10665/329376/9789241516464-eng.pdf}{WHO CES Methodology}.
 #'
-#' @format A data frame with 4929 rows and 79 columns:
+#' @format A data frame with 4929 rows and 80 columns:
 #' \describe{
 #'   \item{admin_1_code}{t}
 #'   \item{admin_1_name}{t}
@@ -16,6 +16,7 @@
 #'   \item{moh_1_name}{u}
 #'   \item{moh_1_label}{u}
 #'   \item{subunit_name}{u}
+#'   \item{segment_name}{u}
 #'   \item{vil_segment_surveyed}{u}
 #'   \item{vil_segment_total}{u}
 #'   \item{hh_house_number}{u}
