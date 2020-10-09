@@ -25,8 +25,12 @@ equity_calculation <- function(data, vectorOfQuintiles, equity_file){
 
   # Ensure answer codes are the same
   for (q_name in names(data)){
-    if (!all(unique(data[[q_name]])[!is.na(unique(data[[q_name]]))] %in%
-             tibble::deframe(df[df$question == q_name, 2]))){
+
+    q_name_s <- rlang::sym(q_name)
+    unique_names_data <- unique(data %>% dplyr::select(!!q_name_s) %>%
+                                  dplyr::filter(!is.na(!!q_name_s)) %>% dplyr::pull(!!q_name_s))
+    unique_names_eq_file <- df %>% dplyr::filter(question == q_name) %>% dplyr::pull(2)
+    if (!all(unique_names_data %in% unique_names_eq_file)){
       stop(sprintf("The answer codes for var %s in the HH respondents DF and the Equity scores DF do not match", q_name))
     }
   }

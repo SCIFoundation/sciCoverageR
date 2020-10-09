@@ -17,7 +17,7 @@ htmltools::img(src = knitr::image_uri("images/SCI_Foundation_RGB_Navy_Long_red.j
 ```
 
 ```{r, include = FALSE}
-options(width = 100)
+options(width = 110)
 ```
 
 <br>
