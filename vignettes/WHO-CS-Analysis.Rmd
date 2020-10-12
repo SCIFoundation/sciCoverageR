@@ -25,7 +25,7 @@ This vignette details how to perform the standard analysis calculations for a co
 
 ## Loading data, libraries and setting options
 
-Before starting we need to call the necessary `R` libraries as well as the underlying data. The `sciCoverageR` package contains a data frame called `vignette_ind` exemplifying data from a WHO Coverage Evaluation Survey methodology survey.  It contains 4929 rows, representing the individuals interviewed and 80 columns.
+Before starting we need to call the necessary `R` libraries as well as the underlying data. The `sciCoverageR` package contains a data frame called `vignette_ind` exemplifying data from a WHO Coverage Evaluation Survey methodology survey.  It contains 7049 rows, representing the individuals interviewed and 117 columns.
 
 ```{r, results='hide', message = FALSE}
 # Load libraries
@@ -37,18 +37,18 @@ library(purrr)
 
 ```{r, warning = FALSE}
 # Load data, examine dimensions, look at 
-data(vignette_ind, package = "sciCoverageR")
-dim(vignette_ind)
+data(example_ind, package = "sciCoverageR")
+dim(example_ind)
 ```
 
-What the variables contain and how they are coded is recorded in the SCIF data dictionary for a CES. See the data dictionary for more details about the variables. In this example survey, only SAC were interviewed (the only response to `ind_group` is `1`) and only about Praziquantel (there are no variables about being offered or having swallowed `alb`).
+What the variables contain and how they are coded is recorded in the SCIF data dictionary for a CES. See the data dictionary for more details about the variables. In this example survey, only SAC were interviewed (the only response to `ind_group` is `1`).
 
 ```{r}
 # Variable names contained in the example data file
-names(vignette_ind)
+head(names(example_ind))
 
 # Check the answer codes to ind_group
-unique(vignette_ind$ind_group)
+unique(example_ind$ind_group)
 ```
 
 Before moving on, we will add an additional erroneous column. The variables containing information on being offered and taking drugs are binary yes/no questions that, following the data dictionary are coded as `0` if no, `1` if yes. The only other possible answer is `NA` for a missing value (e.g., if the individual refused to participate).
@@ -57,7 +57,7 @@ We will add a column with values `0`, `1`, and `2`. This will be used to showcas
 
 ```{r}
 # Add little error (for later)
-vignette_ind$ind_error_pzq_bin <- sample(0:2, nrow(vignette_ind), replace = T)
+example_ind$ind_error_pzq_bin <- sample(0:2, nrow(example_ind), replace = T)
 ```
 
 ## Include additional information and set survey design
@@ -72,8 +72,8 @@ A discussion about the use of different survey designs is beyond the scope of th
 
 ```{r}
 # Requires survey design
-design <- svydesign(ids =    ~ segment_name + KEY_hh + KEY_ind,
-                    data = vignette_ind)
+design <- svydesign(ids = ~ segment_name + hh_house_code + ind_code,
+                    data = example_ind)
 design
 ```
 
@@ -90,19 +90,17 @@ Once the design is set, the survey coverage and reach can be calculated using th
 
 Using the just create `design` object, partitioning by the Health District (`moh_1_label`) to obtain the estimate of the survey reach for PZQ we just need to input the relevant variables into the function:
 
-```{r, results='hide', warning = FALSE}
+```{r}
 estimate_cs_values(var = "ind_offered_pzq_bin", part = "moh_1_label", design = design)
 ```
 
-The first thing to note is that the output will, in the case of this data set, generate a warning denoting the algorithm has not converged. This is generally something worth investigating but nothing to worry in this case. The algorithm will not be able to calculate confidence intervals if all answers are alike. So if within one subgroup (here, SAC who attend school in Health District C - row 15) all have the same answer (here, all were indeed offered PZQ), the algorithm fails and simply sets estimate, lower CI, and upper CI to the value in question (here, 1).
+If a drug only in certain areas, reduced.
 
-```{r, results='hide', echo=FALSE}
-estimate_cs_values(var = "ind_offered_pzq_bin", part = "moh_1_label", design = design)
+```{r}
+estimate_cs_values(var = "ind_offered_alb_bin", part = "moh_1_label", design = design)
 ```
 
-```{r, echo=FALSE, warning = FALSE}
-estimate_cs_values(var = "ind_offered_pzq_bin", part = "moh_1_label", design = design)
-```
+Text
 
 Comment output
 
@@ -110,6 +108,10 @@ Comment output
 ```{r}
 estimate_cs_values(var = "ind_offered_pzq_bin", part = "admin_1_label", design = design)
 ```
+
+## Using function - conversion issues if answers are unique
+
+The first thing to note is that the output will, in the case of this data set, generate a warning denoting the algorithm has not converged. This is generally something worth investigating but nothing to worry in this case. The algorithm will not be able to calculate confidence intervals if all answers are alike. So if within one subgroup (here, SAC who attend school in Health District C - row 15) all have the same answer (here, all were indeed offered PZQ), the algorithm fails and simply sets estimate, lower CI, and upper CI to the value in question (here, 1).
 
 
 ## Using function - expanded options

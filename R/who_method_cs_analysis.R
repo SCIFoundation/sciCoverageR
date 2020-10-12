@@ -31,7 +31,7 @@ estimate_cs_values <- function(var, part, design, level = 0.95, degf = NA){
   formula_part <- stats::as.formula(paste0("~", part))
 
   formula_part_sex <- stats::as.formula(paste0("~", part, "+ ind_sex"))
-  formula_part_att <- stats::as.formula(paste0("~", part, "+ ind_child_attendance"))
+  formula_part_att <- stats::as.formula(paste0("~", part, "+ ind_child_attend_bin"))
 
   drug_name <- toupper(gsub('^(ind_)(.+)(_{1})(.+)(_bin)$',"\\4", var))
 
@@ -67,9 +67,9 @@ estimate_cs_values <- function(var, part, design, level = 0.95, degf = NA){
   # Step 4.1 - Go through SAC --------------------------------------------
   #==================================================================================#
 
-  if (1 %in% survey_groups){
+  if ("1_SAC" %in% survey_groups){
 
-    group <- 1
+    group <- "1_SAC"
     # For SAC, calculate overall result, by sex, and by attendance, give uniformity
     sac_all <- short_svyby(formula_var, formula_part, design = design_f, group, level = level, degf = degf) %>%
       dplyr::mutate(!!sex := NA, !! attendance := NA, !!drug := drug_name, by = "overall") %>%
@@ -92,9 +92,9 @@ estimate_cs_values <- function(var, part, design, level = 0.95, degf = NA){
   # Step 4.2 - Go through Adults --------------------------------------------
   #==================================================================================#
 
-  if (2 %in% survey_groups){
+  if ("2_Adult" %in% survey_groups){
 
-    group <- 2
+    group <- "2_Adult"
     # For adults, calculate overall result and sex, give uniformity
     adu_all <- short_svyby(formula_var, formula_part, design = design_f, group, level = level, degf = degf) %>%
       dplyr::mutate(!!sex := NA, !!attendance := NA, !!drug := drug_name, by = "overall") %>%
@@ -113,11 +113,11 @@ estimate_cs_values <- function(var, part, design, level = 0.95, degf = NA){
   # Step 5 - Bind and output --------------------------------------------
   #==================================================================================#
 
-  if (all(1:2 %in% survey_groups)){ # Both present
+  if (all(c("1_SAC", "2_Adult") %in% survey_groups)){ # Both present
 
     result <- rbind(sac, adu)
 
-  } else if (1 %in% survey_groups) { # SAC only
+  } else if ("1_SAC" %in% survey_groups) { # SAC only
 
     result <- sac
 
@@ -172,26 +172,26 @@ evaluate_df <- function(df){
   # Currently the data dicitonary has it as var "ind_group", as this changes, this function would need to change
   if (!("ind_group" %in% names(df))) stop("Function requires the variable ind_group denoting group (e.g., SAC, Adult)")
 
-  # Further, the variable ind_group is written as code 1 for SAC, code 2 for adults. Check at least one of these is contained
-  # As the data dictionary evolves, this would need to reflect those changes
+  # Further, the variable ind_group is written as code << 1_SAC >> for SAC, code << 2_Adult >> for adults.
+  # Check at least one of these is contained. As the data dictionary evolves, this would need to reflect those changes
   survey_groups <- unique(stats::na.omit(df$ind_group))
-  if (!any(1:2 %in% survey_groups)) {
-    stop(sprintf("The function assumes var ind_group is coded as 1 for SAC, 2 for adults. Currently, var ind_group has answers: %s",
+  if (!any(c("1_SAC", "2_Adult") %in% survey_groups)) {
+    stop(sprintf("The function assumes var ind_group is coded as << 1_SAC >> for SAC, code << 2_Adult >> for adults. Currently, var ind_group has answers: %s",
                  paste(survey_groups, collapse = ", ")))
   }
 
   # Check for sex and school attendance variables
   if (!("ind_sex" %in% names(df))) stop("Function requires the variable ind_sex denoting sex")
-  if (!("ind_child_attendance" %in% names(df))) stop("Function requires the variable ind_child_attendance denoting attendance")
+  if (!("ind_child_attend_bin" %in% names(df))) stop("Function requires the variable ind_child_attend_bin denoting attendance")
 
-  if (!any(0:1 %in% unique(stats::na.omit(df$ind_sex)))) {
-    stop(sprintf("The function assumes var ind_sex is coded as 0 for males, 1 for females. Currently, var ind_sex has answers: %s",
+  if (!any(c("1_Male", "2_Female") %in% unique(stats::na.omit(df$ind_sex)))) {
+    stop(sprintf("The function assumes var ind_sex is coded as << 1_Male >> for males, << 2_Female >> for females. Currently, var ind_sex has answers: %s",
                  paste(unique(stats::na.omit(df$ind_sex)), collapse = ", ")))
   }
 
-  if (!any(0:1 %in% unique(stats::na.omit(df$ind_child_attendance)))) {
-    stop(sprintf("The function assumes var ind_child_attendance is coded as 0 for males, 1 for females. Currently, var ind_child_attendance has answers: %s",
-                 paste(unique(stats::na.omit(df$ind_child_attendance)), collapse = ", ")))
+  if (!any(0:1 %in% unique(stats::na.omit(df$ind_child_attend_bin)))) {
+    stop(sprintf("The function assumes var ind_child_attend_bin is coded as 0 for males, 1 for females. Currently, var ind_child_attend_bin has answers: %s",
+                 paste(unique(stats::na.omit(df$ind_child_attend_bin)), collapse = ", ")))
   }
 
   return(survey_groups)

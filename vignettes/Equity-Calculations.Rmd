@@ -21,16 +21,16 @@ This vignette details how to obtain and amend the [Equity Tool](https://www.equi
 
 ## Obtaining data
 
-The questions and answers to establish the equity scores vary from country to country as well as over time. The country specific details need to be downloaded from the [Equity Tool website]( https://www.equitytool.org). This requires navigating to the country site and requesting the country file by filling out the form for *Other platforms*. `Figure 1` shows the website with the form for Côte d’Ivoire.
+The questions and answers to establish the equity scores vary from country to country as well as over time. The country specific details need to be downloaded from the [Equity Tool website]( https://www.equitytool.org). This requires navigating to the country site and requesting the country file by filling out the form for *Other platforms*. `Figure 1` shows the website with the form for Democratic Republic of the Congo (DRC).
 
 <br>
 
 ```{r pressure, echo=FALSE, fig.cap="Figure 1 - Equity Tool Website", fig.topcaption=TRUE, out.width = '100%'}
-knitr::include_graphics("images/et_website_civ.png")
+knitr::include_graphics("images/et_website_drc.png")
 ```
 
 <br>
-Once filled out, you should quickly receive an email to the address provided with the Equity Tool information contained in an attached Excel file. This file contains four sheets. Relevant to our purposes is the last sheet named “*Other software*”. This sheet contains the questions to be posed to the household respondent, the possible answers as well as the associated scores. `Figure 2` shows the *Other software* sheet for Côte d’Ivoire.
+Once filled out, you should quickly receive an email to the address provided with the Equity Tool information contained in an attached Excel file. This file contains four sheets. Relevant to our purposes is the last sheet named “*Other software*”. This sheet contains the questions to be posed to the household respondent, the possible answers as well as the associated scores. `Figure 2` shows the *Other software* sheet for DRC.
 
 <br>
 
@@ -63,7 +63,7 @@ You need to simplify these codes into a table of seven column and as many rows a
 <br>
 
 ```{r, echo=FALSE, fig.cap="Figure 4 - Stripped-down version of the Equity Tool file", fig.topcaption=TRUE, out.width = '100%'}
-knitr::include_graphics("images/adapted_equity_tool_simple.png")
+knitr::include_graphics("images/adapted_equity_tool_simple_drc.png")
 ```
 
 <br>
@@ -84,41 +84,41 @@ The previous step showed how to amend the Equity Tool information and save it. O
 
 <br>
 
-This package contains an example of hte file shown in `Figure 4`. If we call on it we can see the data frame contains the same information.
+This package contains an example of the file shown in `Figure 4`. If we call on it we can see the data frame contains the same information.
 
 <br>
 
 ```{r}
-data(eq_answers, package = "sciCoverageR")
-head(eq_answers)
+data(drc_equity_tool_codes, package = "sciCoverageR")
+head(drc_equity_tool_codes)
 ```
 
 <br>
 
-This package further contains an example data frame for household answers from a coverage survey using the [WHO Coverage Evaluation Survey methodology](https://apps.who.int/iris/bitstream/handle/10665/329376/9789241516464-eng.pdf). We can see, it contains 2261 rows and 38 columns. The answers to the Equity Tool questions are stored in columns 9:19.
+This package further contains an example data frame for the household answers to the equity questions from a coverage survey using the [WHO Coverage Evaluation Survey methodology](https://apps.who.int/iris/bitstream/handle/10665/329376/9789241516464-eng.pdf). We can see, it contains 3282 rows and 10 columns.
 
 <br>
 
 ```{r}
-data(vignette_hh, package = "sciCoverageR")
-dim(vignette_hh)
-names(vignette_hh)
+data(example_equity, package = "sciCoverageR")
+dim(example_equity)
+names(example_equity)
 ```
 
 <br>
 
-Let us extract those columns into a separate data frame called `eq`. Additionally, for reasons that will become apparent soon, let us save `eq_2`, which by mistake also contains the 20th column. Finally, let us store the vector of quintiles (`voq`) from the Equity Tools document shown in `Figure 3`.
+Let us, for reasons that will become apparent soon, save `example_equity_2`, which by mistake also contains an imaginary column, where all households have respondend with "yes" to owning an ice cream machine (variable `ice_cream`). Finally, let us store the vector of quintiles (`voq`) from the Equity Tools document shown in `Figure 3`.
 
 <br>
 
 ```{r}
-eq <- vignette_hh[, 9:19]
-eq_2 <- vignette_hh[, 9:20]
-voq <- c(-0.384090795, -0.3583393779, 0.111673076, 0.554555339)
+example_equity_2 <- example_equity
+example_equity_2$ice_cream <- "yes"
+voq <- c(-0.379487647, -0.286513899, -0.060301474, 0.653964958)
 ```
 
 
-Now that we have all three elements, we can use the `equity_calculation` function. `Figure 5` shows the function documentation. The function has the three arguments discussed. The first, `data` should be the data frame containing the household responses, thus `eq` in this example. The second input is the vector of quintiles, `voq` in this example. Finally, the equity_file argument is the information of the possible answers and their scores from Equity Tool, `eq_answers` in this example.
+Now that we have all three elements, we can use the `equity_calculation` function. `Figure 5` shows the function documentation. The function has the three arguments discussed. The first, `data` should be the data frame containing the household responses, thus `example_equity` in this example. The second input is the vector of quintiles, `voq` in this example. Finally, the equity_file argument is the information of the possible answers and their scores from Equity Tool, `drc_equity_tool_codes` in this example.
 
 <br>
 
@@ -128,25 +128,25 @@ knitr::include_graphics("images/equity_help.jpg")
 
 <br>
 
-Before evaluating the response, let us go through some possible errors. If we call the function but use the wrong household response data frame (`eq_2`), the function will not work and alert us that the column names do not agree.
+Before evaluating the response, let us go through some possible errors. If we call the function but use the wrong household response data frame (`example_equity_2`), the function will not work and alert us that the column names do not agree.
 
 <br>
 
 ```{r, error=TRUE}
 library(sciCoverageR)
-result <- equity_calculation(data = eq_2, vectorOfQuintiles = voq, equity_file = eq_answers)
+result <- equity_calculation(data = example_equity_2, vectorOfQuintiles = voq, equity_file = drc_equity_tool_codes)
 ```
 
 <br>
 
 The function tells us that the error is that the column names of both data frames do not match since `eq_2` has one column more.
 
-The columns need to agree not only in number (`eq_2` had one column more than `eq`) but also in the exact wording. For example, the names of the questions are the following:
+The columns need to agree not only in number (`example_equity_2` had one column more than `example_equity`) but also in the exact wording. For example, the names of the questions are the following:
 
 <br>
 
 ```{r, echo=FALSE}
-names(eq)
+names(example_equity)
 ```
 
 <br>
@@ -156,9 +156,9 @@ If we change `television` to `televisions` the function would not work either. T
 <br>
 
 ```{r, error=TRUE}
-eq_wrong_names <- eq
-names(eq_wrong_names)[2] <- "televisions"
-result <- equity_calculation(data = eq_wrong_names, vectorOfQuintiles = voq, equity_file = eq_answers)
+example_equity_wrong_names <- example_equity
+names(example_equity_wrong_names)[names(example_equity_wrong_names) == "television"] <- "televisions"
+result <- equity_calculation(data = example_equity_wrong_names, vectorOfQuintiles = voq, equity_file = drc_equity_tool_codes)
 ```
 
 <br>
@@ -168,22 +168,21 @@ Another possible error is if the answer codes do not match. As an example, let u
 <br>
 
 ```{r, error=TRUE}
-eq_french_answers <- eq
-eq_french_answers$television <- ifelse(eq_french_answers$television == "yes", "oui", "non")
-result <- equity_calculation(data = eq_french_answers, vectorOfQuintiles = voq, equity_file = eq_answers)
+example_equity_french <- example_equity
+example_equity_french$television <- ifelse(example_equity_french$television == "yes", "oui", "non")
+result <- equity_calculation(data = example_equity_french, vectorOfQuintiles = voq, equity_file = drc_equity_tool_codes)
 ```
 
 <br>
 
-The function fails but alerts the user to the variable that is failing. Note that if more than one variable contains different answer codes, only the left-most column will be highlighted. Only after correction of the first column was corrected will the next error be highlighted.
+The function fails but alerts the user to the variable that is failing. Note that if more than one variable contains different answer codes, only the left-most column will be highlighted. Only after correcting that left-most column will the next error be highlighted.
 
 Finally, if there are no errors, the function will create a data frame of as many rows there are respondents and two columns: `scores`, which contains the equity score and `quintiles`, which contains the equity quintile. 
 This data frame respects the order from the respondents answers so the columns can just be added to the data frame to obtain the Equity Tool information.
 
 ```{r, error=TRUE}
-result <- equity_calculation(data = eq, vectorOfQuintiles = voq, equity_file = eq_answers)
+result <- equity_calculation(data = example_equity, vectorOfQuintiles = voq, equity_file = drc_equity_tool_codes)
 dim(result)
-vignette_hh <- dplyr::bind_rows(vignette_hh, result)
-table(vignette_hh$quintiles)
+table(result$quintiles, useNA = "ifany")
 ```
 
