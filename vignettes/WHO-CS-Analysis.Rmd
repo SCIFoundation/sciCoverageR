@@ -104,9 +104,16 @@ Text
 
 Comment output
 
+## Using function - the partition argument
 
 ```{r}
-estimate_cs_values(var = "ind_offered_pzq_bin", part = "admin_1_label", design = design)
+estimate_cs_values(var = "ind_offered_pzq_bin", part = "country_code", design = design)
+```
+
+
+
+```{r}
+estimate_cs_values(var = "ind_offered_pzq_bin", part = "hh_national_equity_quintile", design = design)
 ```
 
 ## Using function - conversion issues if answers are unique
