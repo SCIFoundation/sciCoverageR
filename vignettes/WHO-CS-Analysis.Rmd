@@ -1,11 +1,12 @@
 ---
-title: "WHO-CS-Analysis"
+title: "WHO CES Analysis"
 output: 
   rmarkdown::html_vignette:
     keep_md: true
     toc: true
+    toc_depth: 3
 vignette: >
-  %\VignetteIndexEntry{WHO-CS-Analysis}
+  %\VignetteIndexEntry{WHO CES Analysis}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -23,7 +24,7 @@ options(width = 110)
 <br>
 This vignette details how to perform the standard analysis calculations for a coverage survey which has followed the [WHO Coverage Survey Evaluation Methodology](https://apps.who.int/iris/bitstream/handle/10665/329376/9789241516464-eng.pdf).
 
-## Loading data, libraries and setting options
+# Loading data, libraries and first look at the data
 
 Before starting we need to call the necessary `R` libraries as well as the underlying data. The `sciCoverageR` package contains a data frame called `vignette_ind` exemplifying data from a WHO Coverage Evaluation Survey methodology survey.  It contains 7049 rows, representing the individuals interviewed and 117 columns.
 
@@ -41,17 +42,138 @@ data(example_ind, package = "sciCoverageR")
 dim(example_ind)
 ```
 
-What the variables contain and how they are coded is recorded in the SCIF data dictionary for a CES. See the data dictionary for more details about the variables. In this example survey, only SAC were interviewed (the only response to `ind_group` is `1`).
+What the variables contain and how they are coded is recorded in the SCIF data dictionary for a CES. See the data dictionary for more details about the variables. In this example survey, only SAC were interviewed (the only response to `ind_group` is `"1_SAC"`).
 
 ```{r}
-# Variable names contained in the example data file
+# Example of variable names contained in the example data file
 head(names(example_ind))
 
 # Check the answer codes to ind_group
 unique(example_ind$ind_group)
 ```
 
-Before moving on, we will add an additional erroneous column. The variables containing information on being offered and taking drugs are binary yes/no questions that, following the data dictionary are coded as `0` if no, `1` if yes. The only other possible answer is `NA` for a missing value (e.g., if the individual refused to participate).
+# Setting up survey design
+
+The example data comes from a survey of four implementation units (IUs), with 30 ssubunits selected per IU using the [Coverage Survey Builder]( https://www.ntdsupport.org/sites/default/files/uploads/docs/resources/Coverage%20Survey%20Builder_v2.11.xls). In this example dataset the IU is the health district, captured by the `moh_1` variables. The second stage of sampling is selecting the households in the segment, while the third stage is selecting the individuals. In the case of the CES methodology all individuals in a chosen household ought to be selected.
+
+In order to analyse the survey data, the survey design needs to be inputted. This is done using the `svydesign` function of the previously loaded `survey` package. The `svydesign` function allows for setting of a finite population correction (fpc) factor at each sampling stage. This is not done here for simplicity. Generally speaking, the design of the survey may vary and thus setting the design is not automatised but rather should be thought about by the analyst assigned to the survey and then set up manually.  
+
+A discussion about the use of different survey designs is beyond the scope of this vignette. It should be just noted that on page 27, [the WHO CES guidance](https://apps.who.int/iris/bitstream/handle/10665/329376/9789241516464-eng.pdf) claims that:
+
+> _Because the survey methodology employed produces an equal probability sample,  sample  estimates  can  be  calculated  without  the  use  of  sample  weights._
+
+```{r}
+# Requires survey design
+cs_design <- svydesign(ids = ~ segment_name + hh_house_code + ind_code,
+                       data = example_ind)
+cs_design
+```
+
+
+# Using the `estimate_cs_values` function 
+
+## Standard use
+
+Once the design is set, the survey coverage and reach can be calculated using the package’s own `estimate_cs_values` function. The function takes three arguments: 
+
+1. `var` codes the binary variable of interest: e.g., answers to whether the individual was offered Praziquantel (`ind_offered_pzq_bin`) or whether the individual swallowed Albendazole (`ind_swallowed_alb_bin`).
+
+2. `part` codes by which variable the data should be partitioned. This should commonly be the IU.
+
+3. `design` is the `survey` design object created by the user for this survey.
+
+The output will give values per partition for the overall value, the value broken down by sex and - if the repondents are SAC - broken down by school attendance.
+
+Using the just created `cs_design` object, partitioning by the Health District (`moh_1_label`) to obtain the estimate of the survey reach for PZQ we just need to input the relevant variables into the function:
+
+```{r}
+estimate_cs_values(var = "ind_offered_pzq_bin", part = "moh_1_label", design = cs_design)
+```
+
+The output follows the [_tidy data_ format](https://r4ds.had.co.nz/tidy-data.html), so it can be subsequently used as a data frame for the production of data visualisation. The output is a data frame containing 9 columns. The columns are:
+
+1. `partition` - The unique values contained in the `part` variable passed on to the function
+
+2. `group` - The group (SAC or adults) the estimates refer to. If both SAC and adults are contained, the function will append the adult results to the SAC results into a single data frame.
+
+3. `drug` - The drug the variable passed to the function as the `var` argument refers to.
+
+4. `by` - The charactersitics by which the information is broken down by (per partition). There are three distinct characteristics: `overall` is the overall result, i.e., not broken down; `sex`, by the sex of the individuals; `attendance`, by the fact whether the individual does or not attend school. The latter only applies to SAC.
+
+5. `sex` - Is `NA` for all values bar those broken down by `sex`, when it denotes what sex the results refer to.
+
+6. `attendance` - Is `NA` for all values bar those broken down by `attendance`, when it denotes whether the child attends school (value `1` for yes) or not (value `0` for no).
+
+7. `estimate` - The point estimate for the survey reach or coverage
+
+8. `lower` - The lower limit of the confidence interval (at the desired confidence level, by default this is 95%) for the estimate for the survey readh or coverage.
+
+9. `upper` - The lower limit of the confidence interval for the estimate for the survey readh or coverage.
+
+In certain cases, the MDA targeted different drugs in different areas. In the case of this example data, for instance, PZQ was distributed in all health districts, but ALB only in two. This can be seen by loooking at the number of non missing answers to the `ind_offered_pzq_bin` and `ind_offered_alb_bin` variables per health district.
+
+```{r}
+table(example_ind$moh_1_label, is.na(example_ind$ind_offered_pzq_bin))
+table(example_ind$moh_1_label, is.na(example_ind$ind_offered_alb_bin))
+```
+
+The function will only return the results for partitions (here IUs) where at least one non missing answer is given. Since in health districts `B` and `C` all answers for ALB are missing, the results for these IUs are not computed. The output has 10 instead of 20 rows.
+
+```{r}
+estimate_cs_values(var = "ind_offered_alb_bin", part = "moh_1_label", design = cs_design)
+```
+
+## The partition argument
+
+The partition argument (shortened to `part`) argument will divide the data by the unique units present in the variable passed to the argument. It is intended for the implementation unit, but any other variable could be used. If we wanted, for example, to have the overall results of the survey we can pass to partition an argument that is the same for all individuals, like the country code.
+
+```{r}
+estimate_cs_values(var = "ind_offered_pzq_bin", part = "country_code", design = cs_design)
+```
+
+Note however, that the survey was not designed to give a country level summary and thus, though the value can be computed, it is not a nationally representative estimate of country wide survey reach.
+
+Another option is to use the equity tool quintiles, to obtain the values per quintile.
+
+```{r}
+estimate_cs_values(var = "ind_offered_pzq_bin", part = "hh_national_equity_quintile", design = cs_design)
+```
+
+## Using additional arguments
+
+The function has two additional arguments that have default values. The argument `level` defines the confidence level at which the confidence interval is calculated. It is set per default at 0.95 but can be set any level we may need. We can compare the first row of the output for the survey reach for PZQ with the default setting and manually setting it at 95%.
+
+```{r}
+estimate_cs_values(var = "ind_offered_pzq_bin", part = "moh_1_label", design = cs_design)[1,]
+estimate_cs_values(var = "ind_offered_pzq_bin", part = "moh_1_label", design = cs_design, 
+                   level = 0.95)[1,]
+```
+
+We can see the results are the same In comparison, at 90% the interval narrows, while at 99% it widens.
+
+```{r}
+estimate_cs_values(var = "ind_offered_pzq_bin", part = "moh_1_label", design = cs_design, 
+                   level = 0.9)[1,]
+estimate_cs_values(var = "ind_offered_pzq_bin", part = "moh_1_label", design = cs_design, 
+                   level = 0.99)[1,]
+```
+
+Finally, we can also set the degrees of freedom, which also impact the interval estimation. By default, the estimation takes the degrees of freedom from the `design` object. This is the recommended method. However, for certain estimates, there aren't enough degrees of freedom to calculate the interval. This is the case, for example, if we wanted to obtain the estimates by subunit, by passing the segment name to the `part` argument.
+
+```{r}
+estimate_cs_values(var = "ind_offered_pzq_bin", part = "segment_name", design = cs_design)[1,]
+```
+
+# Error flagging
+
+
+## Convergence error if responses are unique
+
+The first thing to note is that the output will, in the case of this data set, generate a warning denoting the algorithm has not converged. This is generally something worth investigating but nothing to worry in this case. The algorithm will not be able to calculate confidence intervals if all answers are alike. So if within one subgroup (here, SAC who attend school in Health District C - row 15) all have the same answer (here, all were indeed offered PZQ), the algorithm fails and simply sets estimate, lower CI, and upper CI to the value in question (here, 1).
+
+
+
+Before moving on, we will add an additional erroneous column. The variables containing information on being offered and taking drugs are binary yes/no questions that, following the data dictionary, are coded as `0` if no, `1` if yes. The only other possible answer is `NA` for a missing value (e.g., if the individual refused to participate).
 
 We will add a column with values `0`, `1`, and `2`. This will be used to showcase the error detection of the calculation functions.
 
@@ -60,85 +182,16 @@ We will add a column with values `0`, `1`, and `2`. This will be used to showcas
 example_ind$ind_error_pzq_bin <- sample(0:2, nrow(example_ind), replace = T)
 ```
 
-## Include additional information and set survey design
-
-The subunits selected from each of the three implementation units (IUs) in the sample data, were chosen using the [Coverage Survey Builder]( https://www.ntdsupport.org/sites/default/files/uploads/docs/resources/Coverage%20Survey%20Builder_v2.11.xls), choosing 30 subunits per IU. In this example dataset the IU is the health district, captured by the `moh_1` variables. The second stage of sampling is selecting the households in the segment, while the third stage is selecting the individuals. In the case of the CES methodology all individuals in a chosen household ought to be selected.
-
-In order to analyse the survey data, the survey design needs to be inputted. This is done using the `svydesign` function of the previously loaded `survey` package. The `svydesign` function allows for setting of a finite population correction (fpc) factor at each sampling stage. This is not done here for simplicity. Generally speaking, the design of the survey may vary and thus setting the design is not automatised but should be entered by hand and thought about by the analyst assigned to the survey.  
-
-A discussion about the use of different survey designs is beyond the scope of this vignette. It should be just noted that on page 27, [the WHO CES guidance](https://apps.who.int/iris/bitstream/handle/10665/329376/9789241516464-eng.pdf) claims that:
-
-> _Because the survey methodology employed produces an equal probability sample,  sample  estimates  can  be  calculated  without  the  use  of  sample  weights._
-
-```{r}
-# Requires survey design
-design <- svydesign(ids = ~ segment_name + hh_house_code + ind_code,
-                    data = example_ind)
-design
-```
-
-
-## Using function - simple
-
-Once the design is set, the survey coverage and reach can be calculated using the package’s own `estimate_cs_values` function. It takes three arguments: 
-
-1. `var` which codes the binary variable of interest: e.g., answers to whether the individual was offered Praziquantel (`ind_offered_pzq_bin`) or whether the individual swallowed Albendazole (`ind_swallow_alb_bin`).
-
-2. `part` which codes by which variable the data should be partitioned. This should commonly be the IU.
-
-3. `design` which is the `survey` design object created by the user for this survey.
-
-Using the just create `design` object, partitioning by the Health District (`moh_1_label`) to obtain the estimate of the survey reach for PZQ we just need to input the relevant variables into the function:
-
-```{r}
-estimate_cs_values(var = "ind_offered_pzq_bin", part = "moh_1_label", design = design)
-```
-
-If a drug only in certain areas, reduced.
-
-```{r}
-estimate_cs_values(var = "ind_offered_alb_bin", part = "moh_1_label", design = design)
-```
-
-Text
-
-Comment output
-
-## Using function - the partition argument
-
-```{r}
-estimate_cs_values(var = "ind_offered_pzq_bin", part = "country_code", design = design)
-```
-
-
-
-```{r}
-estimate_cs_values(var = "ind_offered_pzq_bin", part = "hh_national_equity_quintile", design = design)
-```
-
-## Using function - conversion issues if answers are unique
-
-The first thing to note is that the output will, in the case of this data set, generate a warning denoting the algorithm has not converged. This is generally something worth investigating but nothing to worry in this case. The algorithm will not be able to calculate confidence intervals if all answers are alike. So if within one subgroup (here, SAC who attend school in Health District C - row 15) all have the same answer (here, all were indeed offered PZQ), the algorithm fails and simply sets estimate, lower CI, and upper CI to the value in question (here, 1).
-
-
-## Using function - expanded options
-
-```{r}
-estimate_cs_values(var = "ind_offered_pzq_bin", part = "moh_1_label", design = design, level = 0.9, degf = Inf)
-```
-
-## Using function - error flagging
-
 <br>
 Variable is not coded 0 / 1 (or missing) as expected
 ```{r, error=TRUE}
-#estimate_cs_values(var = "ind_error_pzq_bin", part = "moh_1_label", design = design)
+#estimate_cs_values(var = "ind_error_pzq_bin", part = "moh_1_label", design = cs_design)
 ```
 
 <br>
 Variable is not one of the variables of interest (reach or coverage of a drug)
 ```{r, error=TRUE}
-#estimate_cs_values(var = "ind_sens_bin", part = "moh_1_label", design = design)
+#estimate_cs_values(var = "ind_sens_bin", part = "moh_1_label", design = cs_design)
 ```
 
 <br>

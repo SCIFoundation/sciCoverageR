@@ -190,7 +190,7 @@ evaluate_df <- function(df){
   }
 
   if (!any(0:1 %in% unique(stats::na.omit(df$ind_child_attend_bin)))) {
-    stop(sprintf("The function assumes var ind_child_attend_bin is coded as 0 for males, 1 for females. Currently, var ind_child_attend_bin has answers: %s",
+    stop(sprintf("The function assumes var ind_child_attend_bin is coded as 0 for attending, 1 for not attending. Currently, var ind_child_attend_bin has answers: %s",
                  paste(unique(stats::na.omit(df$ind_child_attend_bin)), collapse = ", ")))
   }
 
