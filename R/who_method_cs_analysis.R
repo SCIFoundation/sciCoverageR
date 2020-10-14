@@ -189,9 +189,11 @@ evaluate_df <- function(df){
                  paste(unique(stats::na.omit(df$ind_sex)), collapse = ", ")))
   }
 
-  if (!any(0:1 %in% unique(stats::na.omit(df$ind_child_attend_bin)))) {
-    stop(sprintf("The function assumes var ind_child_attend_bin is coded as 0 for attending, 1 for not attending. Currently, var ind_child_attend_bin has answers: %s",
-                 paste(unique(stats::na.omit(df$ind_child_attend_bin)), collapse = ", ")))
+  if ("1_SAC" %in% survey_groups){ # Evaluate child attendance variable only if there are kids in the survey
+    if (!any(0:1 %in% unique(stats::na.omit(df$ind_child_attend_bin)))) {
+      stop(sprintf("The function assumes var ind_child_attend_bin is coded as 0 for males, 1 for females. Currently, var ind_child_attend_bin has answers: %s",
+                   paste(unique(stats::na.omit(df$ind_child_attend_bin)), collapse = ", ")))
+    }
   }
 
   return(survey_groups)
@@ -204,14 +206,20 @@ evaluate_df <- function(df){
 
 evaluate_args <- function(var, part, design){
 
+  # Check design object
+  if(!(sort(unique(class(design)))[1] == "survey.design")) stop("Your design object is not a survey package design object")
+
   # Check var is string
   if (!(is.character(var) & length(var) == 1)) stop("The name of the variable to analyse is not a simple, length one string")
 
-  # Check var part string
+  # Check var is a column in df
+  if(!var %in% names(design$variables)) stop(sprintf("Variable %s is not a column header name for the design object passed", var))
+
+  # Check part is string
   if (!(is.character(part) & length(part) == 1)) stop("The name of the variable of the partition is not a simple, length one string")
 
-  # Check design object
-  if(!(class(design)[2] == "survey.design")) stop("Your design object is not a survey package design object")
+  # Check part is a column in df
+  if(!part %in% names(design$variables)) stop(sprintf("Partition argument %s is not a column header name for the design object passed", part))
 
 }
 

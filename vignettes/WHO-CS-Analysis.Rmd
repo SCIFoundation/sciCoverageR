@@ -18,11 +18,13 @@ htmltools::img(src = knitr::image_uri("images/SCI_Foundation_RGB_Navy_Long_red.j
 ```
 
 ```{r, include = FALSE}
-options(width = 110)
+options(width = 120)
 ```
 
 <br>
 This vignette details how to perform the standard analysis calculations for a coverage survey which has followed the [WHO Coverage Survey Evaluation Methodology](https://apps.who.int/iris/bitstream/handle/10665/329376/9789241516464-eng.pdf).
+
+<br>
 
 # Loading data, libraries and first look at the data
 
@@ -52,9 +54,11 @@ head(names(example_ind))
 unique(example_ind$ind_group)
 ```
 
+<br>
+
 # Setting up survey design
 
-The example data comes from a survey of four implementation units (IUs), with 30 ssubunits selected per IU using the [Coverage Survey Builder]( https://www.ntdsupport.org/sites/default/files/uploads/docs/resources/Coverage%20Survey%20Builder_v2.11.xls). In this example dataset the IU is the health district, captured by the `moh_1` variables. The second stage of sampling is selecting the households in the segment, while the third stage is selecting the individuals. In the case of the CES methodology all individuals in a chosen household ought to be selected.
+The example data comes from a survey of four implementation units (IUs), with 30 subunits selected per IU using the [Coverage Survey Builder]( https://www.ntdsupport.org/sites/default/files/uploads/docs/resources/Coverage%20Survey%20Builder_v2.11.xls). In this example dataset the IU is the health district, captured by the `moh_1` variables. The second stage of sampling is selecting the households in the segment, while the third stage is selecting the individuals. In the case of the CES methodology all individuals in a chosen household ought to be selected.
 
 In order to analyse the survey data, the survey design needs to be inputted. This is done using the `svydesign` function of the previously loaded `survey` package. The `svydesign` function allows for setting of a finite population correction (fpc) factor at each sampling stage. This is not done here for simplicity. Generally speaking, the design of the survey may vary and thus setting the design is not automatised but rather should be thought about by the analyst assigned to the survey and then set up manually.  
 
@@ -69,6 +73,7 @@ cs_design <- svydesign(ids = ~ segment_name + hh_house_code + ind_code,
 cs_design
 ```
 
+<br>
 
 # Using the `estimate_cs_values` function 
 
@@ -82,7 +87,7 @@ Once the design is set, the survey coverage and reach can be calculated using th
 
 3. `design` is the `survey` design object created by the user for this survey.
 
-The output will give values per partition for the overall value, the value broken down by sex and - if the repondents are SAC - broken down by school attendance.
+The output will give values per partition for the overall value, the value broken down by sex and - if the respondents are SAC - broken down by school attendance.
 
 Using the just created `cs_design` object, partitioning by the Health District (`moh_1_label`) to obtain the estimate of the survey reach for PZQ we just need to input the relevant variables into the function:
 
@@ -98,7 +103,7 @@ The output follows the [_tidy data_ format](https://r4ds.had.co.nz/tidy-data.htm
 
 3. `drug` - The drug the variable passed to the function as the `var` argument refers to.
 
-4. `by` - The charactersitics by which the information is broken down by (per partition). There are three distinct characteristics: `overall` is the overall result, i.e., not broken down; `sex`, by the sex of the individuals; `attendance`, by the fact whether the individual does or not attend school. The latter only applies to SAC.
+4. `by` - The characteristics by which the information is broken down by (per partition). There are three distinct characteristics: `overall` is the overall result, i.e., not broken down; `sex`, by the sex of the individuals; `attendance`, by the fact whether the individual does or not attend school. The latter only applies to SAC.
 
 5. `sex` - Is `NA` for all values bar those broken down by `sex`, when it denotes what sex the results refer to.
 
@@ -106,11 +111,11 @@ The output follows the [_tidy data_ format](https://r4ds.had.co.nz/tidy-data.htm
 
 7. `estimate` - The point estimate for the survey reach or coverage
 
-8. `lower` - The lower limit of the confidence interval (at the desired confidence level, by default this is 95%) for the estimate for the survey readh or coverage.
+8. `lower` - The lower limit of the confidence interval (at the desired confidence level, by default this is 95%) for the estimate for the survey reach or coverage.
 
-9. `upper` - The lower limit of the confidence interval for the estimate for the survey readh or coverage.
+9. `upper` - The lower limit of the confidence interval for the estimate for the survey reach or coverage.
 
-In certain cases, the MDA targeted different drugs in different areas. In the case of this example data, for instance, PZQ was distributed in all health districts, but ALB only in two. This can be seen by loooking at the number of non missing answers to the `ind_offered_pzq_bin` and `ind_offered_alb_bin` variables per health district.
+In certain cases, the MDA targeted different drugs in different areas. In the case of this example data, for instance, PZQ was distributed in all health districts, but ALB only in two. This can be seen by looking at the number of non-missing answers to the `ind_offered_pzq_bin` and `ind_offered_alb_bin` variables per health district.
 
 ```{r}
 table(example_ind$moh_1_label, is.na(example_ind$ind_offered_pzq_bin))
@@ -136,7 +141,8 @@ Note however, that the survey was not designed to give a country level summary a
 Another option is to use the equity tool quintiles, to obtain the values per quintile.
 
 ```{r}
-estimate_cs_values(var = "ind_offered_pzq_bin", part = "hh_national_equity_quintile", design = cs_design)
+estimate_cs_values(var = "ind_offered_pzq_bin", part = "hh_national_equity_quintile", 
+                   design = cs_design)
 ```
 
 ## Using additional arguments
@@ -158,74 +164,144 @@ estimate_cs_values(var = "ind_offered_pzq_bin", part = "moh_1_label", design = c
                    level = 0.99)[1,]
 ```
 
-Finally, we can also set the degrees of freedom, which also impact the interval estimation. By default, the estimation takes the degrees of freedom from the `design` object. This is the recommended method. However, for certain estimates, there aren't enough degrees of freedom to calculate the interval. This is the case, for example, if we wanted to obtain the estimates by subunit, by passing the segment name to the `part` argument.
+Finally, we can also set the degrees of freedom, which also impact the interval estimation. By default, the estimation takes the degrees of freedom from the `design` object. This is the recommended method. However, for certain estimates, there are not enough degrees of freedom to calculate the interval. 
+
+The survey package function calculates the degrees of freedom as one less than the number of first level units, that is the number of unique units contained in the first variable passed to the `ids` argument of `svydesign`. In our case, we inputted `segment_name`, which has 120 distinct entries, 30 for each IU. The degrees of freedom are thus:
 
 ```{r}
-estimate_cs_values(var = "ind_offered_pzq_bin", part = "segment_name", design = cs_design)[1,]
+degf(cs_design)
+degf(subset(cs_design, moh_1_label == "Health District A"))
+degf(subset(cs_design, segment_name == "segment_1"))
 ```
 
-# Error flagging
 
-
-## Convergence error if responses are unique
-
-The first thing to note is that the output will, in the case of this data set, generate a warning denoting the algorithm has not converged. This is generally something worth investigating but nothing to worry in this case. The algorithm will not be able to calculate confidence intervals if all answers are alike. So if within one subgroup (here, SAC who attend school in Health District C - row 15) all have the same answer (here, all were indeed offered PZQ), the algorithm fails and simply sets estimate, lower CI, and upper CI to the value in question (here, 1).
-
-
-
-Before moving on, we will add an additional erroneous column. The variables containing information on being offered and taking drugs are binary yes/no questions that, following the data dictionary, are coded as `0` if no, `1` if yes. The only other possible answer is `NA` for a missing value (e.g., if the individual refused to participate).
-
-We will add a column with values `0`, `1`, and `2`. This will be used to showcase the error detection of the calculation functions.
+Hence the estimate for each health district is calculated with 29 degrees of freedom. We can see that leaving the default or manually passing this argument leads to the same result.
 
 ```{r}
-# Add little error (for later)
-example_ind$ind_error_pzq_bin <- sample(0:2, nrow(example_ind), replace = T)
+estimate_cs_values(var = "ind_offered_pzq_bin", part = "moh_1_label", design = cs_design)[1,]
+estimate_cs_values(var = "ind_offered_pzq_bin", part = "moh_1_label", design = cs_design, 
+                   degf = 29)[1,]
 ```
 
-<br>
-Variable is not coded 0 / 1 (or missing) as expected
-```{r, error=TRUE}
-#estimate_cs_values(var = "ind_error_pzq_bin", part = "moh_1_label", design = cs_design)
-```
-
-<br>
-Variable is not one of the variables of interest (reach or coverage of a drug)
-```{r, error=TRUE}
-#estimate_cs_values(var = "ind_sens_bin", part = "moh_1_label", design = cs_design)
-```
-
-<br>
-Group info is coded as a string and not as per data dictionary
-```{r, error=TRUE}
-#alternative <- vignette_ind
-#alternative$ind_group <- case_when(alternative$ind_group == 1 ~ "SAC",
-#                                   alternative$ind_group == 2 ~ "Adults")
-
-#alt_design <- svydesign(ids =    ~ subunit_name + vil_segment_surveyed,
-#                    strata = ~ moh_1_label + NULL,
-#                    fpc =    ~ fpc_district + vil_segment_total,
-#                    data = alternative)
-#estimate_cs_values(var = "ind_offered_pzq_bin", part = "moh_1_label", design = alt_design)
-```
-
-<br>
-Group info is coded as in a differently named variable (e.g. ind_sac, coded as 0 no and 1 yes)
-```{r, error=TRUE}
-#alternative <- vignette_ind
-#alternative$ind_sac <- alternative$ind_group - 1
-#alternative$ind_group <- NULL
-
-#alt_design <- svydesign(ids =    ~ subunit_name + vil_segment_surveyed,
-#                    strata = ~ moh_1_label + NULL,
-#                    fpc =    ~ fpc_district + vil_segment_total,
-#                    data = alternative)
-#estimate_cs_values(var = "ind_offered_pzq_bin", part = "moh_1_label", design = alt_design)
-```
+For cases where the degrees of freedom are 1 or less, the method to calculate the confidence interval fails, and we may need to enter the degrees of freedom manually to estimate the confidence interval. This is for example the case if we wanted to obtain segment level estimates (for which the degrees of freedom are 0). In the example data set this would not be possible due to an error, yet how to nonetheless obtain these estimates is covered in the error flagging section. Before we look how to  leverage the `map` function from the `purrr` package to obtain a single data set with all estimates.
 
 ## Using function - Purrrfect
 
-```{r}
+The `map` function allows us to directly pass a list of arguments as the first argument of any function. This means, here, that we can create a list with all the variables we are interested in. The logic of the `map` function is not further discussed here, but further reading is [available here from the R for Data Science book](https://r4ds.had.co.nz/iteration.html#the-map-functions).
+
+For ease of viewing, we will use `country_code` as partition argument, to reduce the number of rows of the output and round the estimates.
+
+```{r, error=FALSE, warning=FALSE}
 # Using the fact that the first element is var
-#vars <- list(reach = "ind_offered_pzq_bin", coverage = "ind_swallow_pzq_bin")
-#map_dfr(vars, estimate_cs_values, part = "moh_1_label", design = design, .id = "question")
+vars <- list(reach_pzq = "ind_offered_pzq_bin", 
+             coverage_pzq = "ind_swallowed_pzq_bin",
+             reach_alb = "ind_offered_alb_bin", 
+             coverage_alb = "ind_swallowed_alb_bin")
+out <- map_dfr(vars, estimate_cs_values, part = "country_code", design = cs_design, 
+               .id = "question")
+out %>% dplyr::mutate(dplyr::across(is.numeric, round, 2))
+```
+
+<br>
+
+# Data validation
+
+## Evaluate function arguments
+
+The first thing the function we will do is to check whether the three necessary arguments (`level` and `degf` have default values and are not checked) are of the expected format. `var` and `part` need to be a single string. If not, the function will error. Same if the variable passed is not contained in the design objects (not the spelling error in the second case, causing the error.)
+
+```{r, error=TRUE}
+estimate_cs_values(var = "ind_offered_pzq_bin", part = 2, design = cs_design)
+estimate_cs_values(var = "ind_offered_pzq_bin", part = "moh_1_lable", design = cs_design)
+```
+
+Additionally, the design object needs to be a design object created using the `svydesign` function, otherwise, an error will inform us that we have not passed an argument of the expected form.
+
+```{r, error=TRUE}
+class(cs_design)
+wrong_design <- unlist(cs_design)
+class(wrong_design)
+
+estimate_cs_values(var = "ind_offered_pzq_bin", part = "moh_1_label", design = wrong_design)
+```
+
+Finally, the function will evaluate the variable name is of the standard naming form. The variables coding information on survey reach or coverage are made up of four blocks, connected by an underscore. The first is `ind`, to denote the information is collected at individual level. The second is `offered` or `swallowed` to denote reach and coverage. This is followed by a three letter coding of the drug (e.g., `pzq` or `alb`), and finally `bin` to denote the variable is a binary yes / no question with codes `0` for no and `1` for yes. Hence, using the non-binary question on PZQ reach (allowing for `does not know` as an answer) will give an error and inform us of what the expected argument looks like:
+
+```{r, error=TRUE}
+estimate_cs_values(var = "ind_offered_pzq", part = "moh_1_label", design = cs_design)
+```
+
+## Evaluate underlying data
+
+The function will also investigate the data contained in the design, not just the arguments in the function. Based on the data dictionary, the function expects:
+
+1. `ind_group` to be present in the data and coded as `1_SAC` or `2_Adult`,
+
+2. `ind_sex` to be present in the data and coded as `1_Male` or `2_Female`, and
+
+3. `ind_child_attend_bin` to be present in the data (if the survey contains SAC) and coded as `0` or `1`.
+
+If the data does not follow these data dictionary conventions, the function will error and inform the user. For example, if we create an alternative data frame and change the coding of `ind_sex` to `m` for male and `f` for female the function will not work:
+
+```{r, error=TRUE, warning=FALSE}
+alt_df <- example_ind
+alt_df$ind_sex <- ifelse(alt_df$ind_sex == "1_Male", "m", "f")
+
+alt_design <- svydesign(ids = ~ segment_name + hh_house_code + ind_code,
+                       data = alt_df)
+
+estimate_cs_values(var = "ind_offered_pzq_bin", part = "moh_1_label", design = alt_design)
+```
+
+# Commonly ocurring issues
+
+The second part of the error flagging section focuses on issues that can commonly arise in the data. These may give a warning or an error, which may startle us, but are still a normal reaction of the function to an anormal circumstance. We look at two errors that occur when group information is unique, i.e., there is no variability in the answers.
+
+## Convergence error if responses are unique
+
+The first thing to note is that the output will generate a warning denoting the algorithm has not converged if a group answer to the reach or coverage question is unique (i.e., all `0` or all `1`). Let us reduce the data to only Health District D and amend the answers so all replies made by girls to `ind_offered_alb` are positive and run the `estimate_cs_values` function on this alternative data.
+
+```{r, warning=FALSE}
+alt_df <- example_ind %>% filter(moh_1_name == "health_district_d")
+alt_df$ind_offered_alb_bin[alt_df$ind_sex == "2_Female"] <- 1
+
+alt_design <- svydesign(ids = ~ segment_name + hh_house_code + ind_code,
+                       data = alt_df)
+```
+
+```{r}
+estimate_cs_values(var = "ind_offered_alb_bin", part = "moh_1_label", design = alt_design)
+```
+
+Note the warning message stating the algorithm did not converge. This warning should generally be investigated but we know that it comes from the fact, in this case, that the answers are all positive. The lower and upper confidence interval estimates are also 1 for the reach for girls.
+
+## Answers missing from groups used to break down the data
+
+As mentioned earlier, the degrees of freedom at the segment level are 0, so we can, to estimate the confidence interval, manually set the degrees of freedom to 2. The function fails nonetheless to produce estimates at the segment level.
+
+```{r, error=TRUE, warning=FALSE}
+estimate_cs_values(var = "ind_offered_pzq_bin", part = "segment_label", design = cs_design, 
+                   degf = 2)
+```
+
+The error notice comes form the underlying `svyciprop` function. How such an error has come about may vary and a precise analysis is warranted. One possible solution is that some group variable used to break down the data is not present in the estimation variable data. Since this is a strange phenomenon, we should look in detail at Segment 84, the culprit in this case.
+
+```{r}
+example_ind %>% filter(segment_name == "segment_84") %>% 
+  summarise(
+    HHs = n_distinct(hh_house_code),
+    Individuals = sum(!is.na(ind_sex), na.rm = T),
+    Girls = sum(ind_sex == "2_Female", na.rm = T),
+    `Girls answered` = sum(ind_sex == "2_Female" & !is.na(ind_offered_pzq_bin), na.rm = T),
+    Boys = sum(ind_sex == "1_Male", na.rm = T),
+    `Boys answered` = sum(ind_sex == "1_Male" & !is.na(ind_offered_pzq_bin), na.rm = T))
+```
+
+As we can see from the table output, the data for this segment comes from 12 HHs, only four if which allowed us to interview. If the 5 SAC in these HHs, only 1 could be interviewed. Hence, the subunit has two distinct answers to the `ind_sex` question, but only answers to the `ind_offeref_pzq_bin` variable from one of the sexes. The `svyciprop` function tries to calculate the answer for both and fails to do so, resulting in this error. 
+
+Since in this case, we know the error comes from Segment 84 we can see that dropping the segment to obtain the results for all other ones.
+
+```{r, warning=FALSE}
+head(estimate_cs_values(var = "ind_offered_pzq_bin", part = "segment_label", 
+                   design = subset(cs_design, !segment_name == "segment_84"), degf = 2))
 ```
