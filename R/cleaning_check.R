@@ -3,7 +3,7 @@
 #' @param data The data to use. Not in quotes
 #' @param variable The variable to use.formatted as data$variable - in quotes
 #' @param tosplitby The variable to split the missings by - in quotes
-#' @param makefactor if not NA
+#' @param makefactor if not NA, makes variable is turned to factor
 #'
 #' @return If the variable is a character or factor, the number of non-missing levels and
 #'   * if there's less than 200 levels - the levels and how many rows in each
