@@ -3,5 +3,6 @@
 export(checkingvariables)
 export(equity_calculation)
 export(estimate_cs_values)
+export(make_dummies)
 importFrom(magrittr,"%>%")
 importFrom(rlang,":=")

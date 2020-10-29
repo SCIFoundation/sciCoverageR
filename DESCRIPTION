@@ -24,7 +24,8 @@ Imports:
     tibble,
     htmltools,
     survey,
-    rlang
+    rlang,
+    stringr
 Suggests: 
     knitr,
     rmarkdown,

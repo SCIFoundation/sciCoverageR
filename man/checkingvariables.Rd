@@ -13,7 +13,7 @@ checkingvariables(data, variable, tosplitby, makefactor = NA)
 
 \item{tosplitby}{The variable to split the missings by - in quotes}
 
-\item{makefactor}{if not NA}
+\item{makefactor}{if not NA, makes variable is turned to factor}
 }
 \value{
 If the variable is a character or factor, the number of non-missing levels and
