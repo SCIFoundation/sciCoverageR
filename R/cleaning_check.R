@@ -23,7 +23,8 @@ checkingvariables <- function(data, variable, tosplitby, makefactor = NA){
   print(variable)
 
   #if character of factor then print unique if less than 200 unique or print number of unique
-  if (is.character(t.data$variable) | is.factor(t.data$variable) | !is.na(makefactor)){
+  if (is.character(t.data$variable) | is.factor(t.data$variable) |
+      inherits(t.data$variable, 'Date')  | !is.na(makefactor)){
     if (length(unique(t.data$variable)) < 200) {
       print("num non-missing unique")
       print(length(unique(t.data$variable[!is.na(t.data$variable)])))
