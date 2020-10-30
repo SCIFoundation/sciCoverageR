@@ -15,6 +15,6 @@ make_dummies <- function(data, variable, prefix){
   result <- purrr::map(unique_names, ~as.double(grepl(sprintf("\\<%s\\>", .x), data[[variable]])))
   # "\\<%s\\>" ensures whole word is matched, no matching "no" in "unknown"
   names(result) <- paste(prefix, unlist(unique_names), sep = "_")
-  result <- bind_cols(result)
+  result <- dplyr::bind_cols(result)
   return(result)
 }
