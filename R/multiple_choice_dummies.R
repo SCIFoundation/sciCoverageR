@@ -12,8 +12,9 @@ make_dummies <- function(data, variable, prefix){
   # Creates a dataframe of dummies based on the answers given
   unique_names <- unique(unlist(stringr::str_split(unique(data[[variable]]), " ")))
   unique_names <- as.list(unique_names[!is.na(unique_names)]) # Drop NA cases, make list to feed to map
-  result <- purrr::map_dfc(unique_names, ~as.double(grepl(sprintf("\\<%s\\>", .x), data[[variable]])))
+  result <- purrr::map(unique_names, ~as.double(grepl(sprintf("\\<%s\\>", .x), data[[variable]])))
   # "\\<%s\\>" ensures whole word is matched, no matching "no" in "unknown"
   names(result) <- paste(prefix, unlist(unique_names), sep = "_")
+  result <- bind_cols(result)
   return(result)
 }
