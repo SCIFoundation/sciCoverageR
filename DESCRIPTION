@@ -25,7 +25,8 @@ Imports:
     htmltools,
     survey,
     rlang,
-    stringr
+    stringr,
+    lme4
 Suggests: 
     knitr,
     rmarkdown,
