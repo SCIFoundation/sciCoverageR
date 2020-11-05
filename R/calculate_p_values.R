@@ -24,10 +24,11 @@ calculate_p_values <- function(drug_name, group, partition, data){
 
   swallow_vars <- names(data)[grepl("^ind_swallowed_[a-zA-Z]+_bin", names(data))]
   present_vars <- unique(gsub('^(ind_)(.+)(_{1})(.+)(_bin)$',"\\4", swallow_vars))
-  drug_check <- drug_name %in% present
+  drug_check <- drug_name %in% present_vars
 
   if (!drug_check) { # Give warning if drug_name passed to function does not coincide with drug in data
-    stop(sprintf("Drug %s is not in the data frame you passed. It contains %s.", drug_name, present))
+    stop(sprintf("Drug %s is not in the data frame you passed. It contains %s.",
+                 drug_name, paste(present_vars, collapse = ", ")))
   }
 
   var_for_reduction <- swallow_vars[grepl(paste("_", drug_name, "_", sep = ""), swallow_vars)]
