@@ -30,7 +30,7 @@ checkingvariables <- function(data, variable, tosplitby, makefactor = NA){
       print(length(unique(t.data$variable[!is.na(t.data$variable)])))
       print(t.data %>% dplyr::filter(!is.na(variable)) %>%
               dplyr::group_by(variable) %>%
-              dplyr::summarise(n=n()) %>%
+              dplyr::summarise(n=dplyr::n()) %>%
               dplyr::arrange(dplyr::desc(n)))
 
     } else {
@@ -52,7 +52,7 @@ checkingvariables <- function(data, variable, tosplitby, makefactor = NA){
     print(length(t.data$variable[is.na(t.data$variable)]))
     print(t.data %>% dplyr::filter(is.na(variable)) %>%
             dplyr::group_by(tosplitby) %>%
-            dplyr::summarise(n=n()) %>%
+            dplyr::summarise(n=dplyr::n()) %>%
             dplyr::arrange(dplyr::desc(n)))
   }
 }

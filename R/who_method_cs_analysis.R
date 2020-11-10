@@ -34,6 +34,8 @@ estimate_cs_values <- function(var, part, design, level = 0.95, degf = NA){
   formula_part_att <- stats::as.formula(paste0("~", part, "+ ind_child_attend_bin"))
 
   drug_name <- toupper(gsub('^(ind_)(.+)(_{1})(.+)(_bin)$',"\\4", var))
+  question_name <- toupper(gsub('^(ind_)(.+)(_{1})(.+)(_bin)$',"\\2", var))
+  question_name <- ifelse(question_name == "SWALLOWED", "coverage", "reach")
 
   # Convert strings to rlang sym objects to pass them thorugh piping, dplyr objects
   sex <- rlang::sym("sex")
@@ -127,6 +129,7 @@ estimate_cs_values <- function(var, part, design, level = 0.95, degf = NA){
 
   }
 
+  result <- result %>% dplyr::mutate(question = question_name) %>% dplyr::select(1:3, question, 4:9)
   return(result)
 
 }

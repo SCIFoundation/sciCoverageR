@@ -26,7 +26,8 @@ Imports:
     survey,
     rlang,
     stringr,
-    lme4
+    lme4,
+    tidyr
 Suggests: 
     knitr,
     rmarkdown,

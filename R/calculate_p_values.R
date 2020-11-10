@@ -75,7 +75,16 @@ calculate_p_values <- function(drug_name, group, partition, data){
   }
 
   p_values <- dplyr::bind_rows(p_values, .id = partition)
-  names(p_values) <- c(partition, "case", "p_value")
+  names(p_values) <- c("partition", "case", "p_value")
+  p_values <-  p_values %>%
+    dplyr::mutate(group = gsub('^(\\d{1})(_{1})([A-Za-z]+)$',"\\3", group),
+                  drug = gsub('^([A-Za-z]{3})(_{1})([A-Za-z]{3})(_{1})([A-Za-z]{3})$',"\\1", case),
+                  drug = toupper(drug),
+                  item = gsub('^([A-Za-z]{3})(_{1})([A-Za-z]{3})(_{1})([A-Za-z]{3})$',"\\5", case),
+                  item = paste0("p_diff_", item), # Make it neater
+                  question = gsub('^([A-Za-z]{3})(_{1})([A-Za-z]{3})(_{1})([A-Za-z]{3})$',"\\3", case),
+                  question = ifelse(question == "off", "reach", "coverage")) %>%
+    dplyr::select(partition, group, drug, item, question, p_value)
 
   #==================================================================================#
   # Return data frame
