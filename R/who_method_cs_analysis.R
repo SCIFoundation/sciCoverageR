@@ -63,73 +63,39 @@ estimate_cs_values <- function(var, part, design, level = 0.95, degf = NA){
   # Step 4 - Go through groups --------------------------------------------
   #==================================================================================#
 
-  # Go through each group. If one is missing it is skipped.
+  result <- list()
+  for (group in sort(unique(survey_groups))){
 
-  #==================================================================================#
-  # Step 4.1 - Go through SAC --------------------------------------------
-  #==================================================================================#
 
-  if ("1_SAC" %in% survey_groups){
-
-    group <- "1_SAC"
-    # For SAC, calculate overall result, by sex, and by attendance, give uniformity
-    sac_all <- short_svyby(formula_var, formula_part, design = design_f, group, level = level, degf = degf) %>%
+    # Calculate overall result, by sex, and - if SAC - by attendance, give uniformity
+    h_all <- short_svyby(formula_var, formula_part, design = design_f, group, level = level, degf = degf) %>%
       dplyr::mutate(!!sex := NA, !! attendance := NA, !!drug := drug_name, by = "overall") %>%
       dplyr::select(partition = 1, drug, by, sex, attendance, estimate = 2, lower = 3, upper = 4)
 
 
-    sac_sex <- short_svyby(formula_var, formula_part_sex, design = design_f, group, level = level, degf = degf) %>%
+    h_sex <- short_svyby(formula_var, formula_part_sex, design = design_f, group, level = level, degf = degf) %>%
       dplyr::mutate(!!attendance := NA, !!drug := drug_name, by = "sex") %>%
       dplyr::select(partition = 1, drug, by, sex = 2, attendance, estimate = 3, lower = 4, upper = 5)
 
-    sac_att <- short_svyby(formula_var, formula_part_att, design = design_f, group, level = level, degf = degf) %>%
-      dplyr::mutate(!!sex := NA, !!drug := drug_name, by = "attendance") %>%
-      dplyr::select(partition = 1, drug, by, sex, attendance = 2, estimate = 3, lower = 4, upper = 5)
+    helper <- rbind(h_all, h_sex)
 
-    sac <- rbind(sac_all, sac_sex, sac_att) %>% dplyr::mutate(group = "SAC") %>% dplyr::select(1,9,2:8)
+    if (grepl("SAC", group)){
+      h_att <- short_svyby(formula_var, formula_part_att, design = design_f, group, level = level, degf = degf) %>%
+        dplyr::mutate(!!sex := NA, !!drug := drug_name, by = "attendance") %>%
+        dplyr::select(partition = 1, drug, by, sex, attendance = 2, estimate = 3, lower = 4, upper = 5)
+      helper <- rbind(helper, h_att)
+    }
 
-  }
-
-  #==================================================================================#
-  # Step 4.2 - Go through Adults --------------------------------------------
-  #==================================================================================#
-
-  if ("2_Adult" %in% survey_groups){
-
-    group <- "2_Adult"
-    # For adults, calculate overall result and sex, give uniformity
-    adu_all <- short_svyby(formula_var, formula_part, design = design_f, group, level = level, degf = degf) %>%
-      dplyr::mutate(!!sex := NA, !!attendance := NA, !!drug := drug_name, by = "overall") %>%
-      dplyr::select(partition = 1, drug, by, sex, attendance, estimate = 2, lower = 3, upper = 4)
-
-
-    adu_sex <- short_svyby(formula_var, formula_part_sex, design = design_f, group, level = level, degf = degf) %>%
-      dplyr::mutate(!!attendance := NA, !!drug := drug_name, by = "sex") %>%
-      dplyr::select(partition = 1, drug, by, sex = 2, attendance, estimate = 3, lower = 4, upper = 5)
-
-    adu <- rbind(adu_all, adu_sex) %>% dplyr::mutate(group = "adults") %>% dplyr::select(1,9,2:8)
+    # Use shortened group name (SAC, not 1_SAC)
+    group_label <- gsub('^(\\d{1})(_{1})([A-Za-z]+)$',"\\3", group)
+    result[[group_label]] <- helper
 
   }
 
-  #==================================================================================#
-  # Step 5 - Bind and output --------------------------------------------
-  #==================================================================================#
+  # Bind and put in standard order
+  result <- dplyr::bind_rows(result, .id = "group") %>% dplyr::mutate(question = question_name) %>%
+    dplyr::select(group, drug, partition, question, by, sex, attendance, estimate, lower, upper)
 
-  if (all(c("1_SAC", "2_Adult") %in% survey_groups)){ # Both present
-
-    result <- rbind(sac, adu)
-
-  } else if ("1_SAC" %in% survey_groups) { # SAC only
-
-    result <- sac
-
-  } else { # Adults only
-
-    result <- adu
-
-  }
-
-  result <- result %>% dplyr::mutate(question = question_name) %>% dplyr::select(1:3, question, 4:9)
   return(result)
 
 }
@@ -178,9 +144,16 @@ evaluate_df <- function(df){
   # Further, the variable ind_group is written as code << 1_SAC >> for SAC, code << 2_Adult >> for adults.
   # Check at least one of these is contained. As the data dictionary evolves, this would need to reflect those changes
   survey_groups <- unique(stats::na.omit(df$ind_group))
-  if (!any(c("1_SAC", "2_Adult") %in% survey_groups)) {
-    stop(sprintf("The function assumes var ind_group is coded as << 1_SAC >> for SAC, code << 2_Adult >> for adults. Currently, var ind_group has answers: %s",
-                 paste(survey_groups, collapse = ", ")))
+  if (length(survey_groups) == 2){
+    if (!all(c("1_SAC", "2_Adult") %in% survey_groups)) {
+      stop(sprintf("The function assumes var ind_group is coded as << 1_SAC >> for SAC, code << 2_Adult >> for adults. Currently, var ind_group has answers: %s",
+                   paste(survey_groups, collapse = ", ")))
+    }
+  } else {
+    if (!any(c("1_SAC", "2_Adult") %in% survey_groups)) {
+      stop(sprintf("The function assumes var ind_group is coded as << 1_SAC >> for SAC, code << 2_Adult >> for adults. Currently, var ind_group has answers: %s",
+                   paste(survey_groups, collapse = ", ")))
+    }
   }
 
   # Check for sex and school attendance variables

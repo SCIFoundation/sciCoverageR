@@ -33,7 +33,8 @@ rr_summary <- function(partition, data){
         dplyr::filter(!is.na(ind_consent_bin) & !is.na(!!rlang::sym(swallow_vars[k]))) %>%
         dplyr::summarise(n_segments = dplyr::n_distinct(segment_name),
                          n_individuals = dplyr::n_distinct(ind_code),
-                         attendance = sprintf("%.1f%%", mean(ind_child_attend_bin, na.rm = T)*100),
+                         attendance = mean(ind_child_attend_bin, na.rm = T)*100,
+                         attendance = ifelse(is.nan(attendance), NA, sprintf("%.1f%%", attendance)),
                          girls = sum(ind_sex == "2_Female", na.rm = T),
                          girls = sprintf("%.1f%%", (girls/n_individuals)*100))
       summary_output[[toupper(present_vars[k])]] <- h
@@ -82,7 +83,7 @@ rr_table <- function(cs_values_output, p_values_output, rr_summary_output){
   # For each group
   for (group in sort(unique(cs_values_output$group), decreasing = T)){
     # Reduce df
-    df <- cs_values_output %>% dplyr::filter(group == group)
+    df <- cs_values_output[cs_values_output$group == group,]
 
     # Block 1 - overall results
     b1 <- df %>% dplyr::filter(by == "overall") %>%
@@ -92,13 +93,17 @@ rr_table <- function(cs_values_output, p_values_output, rr_summary_output){
       tidyr::pivot_wider(names_from = partition, names_glue = "{partition}", values_from = value) %>%
       dplyr::arrange(drug, dplyr::desc(question))
 
-    # Block 2 - Attending
-    b2 <- df %>% dplyr::filter(by == "attendance") %>%
-      dplyr::mutate(item = ifelse(attendance == 0, "non attending", "attending"),
-                    estimate = sprintf("%.1f%%", estimate*100)) %>%
-      dplyr::select(partition, drug, item, question, estimate) %>%
-      tidyr::pivot_wider(names_from = partition, names_glue = "{partition}", values_from = estimate) %>%
-      dplyr::arrange(drug, item, dplyr::desc(question))
+    if(grepl("SAC", group)){
+
+      # Block 2 - Attending
+      b2 <- df %>% dplyr::filter(by == "attendance") %>%
+        dplyr::mutate(item = ifelse(attendance == 0, "non attending", "attending"),
+                      estimate = sprintf("%.1f%%", estimate*100)) %>%
+        dplyr::select(partition, drug, item, question, estimate) %>%
+        tidyr::pivot_wider(names_from = partition, names_glue = "{partition}", values_from = estimate) %>%
+        dplyr::arrange(drug, item, dplyr::desc(question))
+
+    }
 
     # Block 3 - Sex
     b3 <- df %>% dplyr::filter(by == "sex") %>%
@@ -107,7 +112,12 @@ rr_table <- function(cs_values_output, p_values_output, rr_summary_output){
       tidyr::pivot_wider(names_from = partition, names_glue = "{partition}", values_from = estimate) %>%
       dplyr::arrange(drug, item, dplyr::desc(question))
 
-    cvo[[group]] <- dplyr::bind_rows(b1, b2, b3)
+    if (grepl("SAC", group)){ # SAC
+      cvo[[group]] <- dplyr::bind_rows(b1, b2, b3)
+    } else { # Adults
+      cvo[[group]] <- dplyr::bind_rows(b1, b3)
+    }
+
   }
 
   cvo <- dplyr::bind_rows(cvo, .id = "group")
@@ -171,7 +181,7 @@ rr_table <- function(cs_values_output, p_values_output, rr_summary_output){
 
   result <- list()
   for (group in sort(unique(rr_output$group), decreasing = T)){
-    result[[group]] <- rr_output %>% dplyr::filter(group == group)
+    result[[group]] <- rr_output[rr_output$group == group,]
   }
   result <- dplyr::bind_rows(result)
 

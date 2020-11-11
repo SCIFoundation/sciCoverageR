@@ -109,9 +109,16 @@ evaluate_data <- function(data){
   # Further, the variable ind_group is written as code << 1_SAC >> for SAC, code << 2_Adult >> for adults.
   # Check at least one of these is contained. As the data dictionary evolves, this would need to reflect those changes
   survey_groups <- unique(stats::na.omit(data$ind_group))
-  if (!any(c("1_SAC", "2_Adult") %in% survey_groups)) {
-    stop(sprintf("The function assumes var ind_group is coded as << 1_SAC >> for SAC, code << 2_Adult >> for adults. Currently, var ind_group has answers: %s",
-                 paste(survey_groups, collapse = ", ")))
+  if (length(survey_groups) == 2){
+    if (!all(c("1_SAC", "2_Adult") %in% survey_groups)) {
+      stop(sprintf("The function assumes var ind_group is coded as << 1_SAC >> for SAC, code << 2_Adult >> for adults. Currently, var ind_group has answers: %s",
+                   paste(survey_groups, collapse = ", ")))
+    }
+  } else {
+    if (!any(c("1_SAC", "2_Adult") %in% survey_groups)) {
+      stop(sprintf("The function assumes var ind_group is coded as << 1_SAC >> for SAC, code << 2_Adult >> for adults. Currently, var ind_group has answers: %s",
+                   paste(survey_groups, collapse = ", ")))
+    }
   }
 
   # Check for sex and school attendance variables
