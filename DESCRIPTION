@@ -2,11 +2,7 @@ Package: sciCoverageR
 Title: Set of SCIF coverage survey functions
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "Mario",
-           family = "Gronert",
-           role = c("aut", "cre"),
-           email = "m.gronert@schisto.org.uk",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
+    person(given = "Mario", family = "Gronert", email = "m.gronert@schisto.org.uk", role = c("aut", "cre"))
 Description: This package contains the standard functions used to perform the cleaning and analysis of drug
              distribution coverage surveys. In addition it contains example data sets to test the functions on.
 License: MIT + file LICENSE
@@ -27,7 +23,11 @@ Imports:
     rlang,
     stringr,
     lme4,
-    tidyr
+    tidyr,
+    sciColours,
+    ggplot2,
+    scales,
+    tidyselect
 Suggests: 
     knitr,
     rmarkdown,
