@@ -2,7 +2,7 @@
 % Please edit documentation in R/who_method_cs_analysis.R
 \name{estimate_cs_values}
 \alias{estimate_cs_values}
-\title{A function to obtain binary var (e.g., coverage: yes / no) estimates with CI from WHO method CS clean data.}
+\title{Calculate CES estimates}
 \usage{
 estimate_cs_values(var, part, design, level = 0.95, degf = NA)
 }

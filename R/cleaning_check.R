@@ -1,3 +1,5 @@
+#' Cleaning checks
+#'
 #' Function showing a summary of the variable and the number of missings for data cleaning
 #'
 #' @param data The data to use. Not in quotes

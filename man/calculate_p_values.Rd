@@ -2,7 +2,7 @@
 % Please edit documentation in R/calculate_p_values.R
 \name{calculate_p_values}
 \alias{calculate_p_values}
-\title{A function to calculate the p values of differences between sexes and attend/non-attend SAC.}
+\title{Calculate CES p values}
 \usage{
 calculate_p_values(drug_name, group, partition, data)
 }

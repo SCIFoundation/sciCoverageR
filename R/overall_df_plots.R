@@ -66,7 +66,7 @@ make_overall_plot_df <- function(survey_estimates, reported_df){
 #' A function to make the overrall plot for dashboards with the `make_overall_plot_df` output.
 #'
 #' @param overall_plot_df Output from the `make_overall_plot_df`
-#' @param target A numerice value between 0 and 1 to set the WHO target coverage. Default is 0.75.
+#' @param target A numeric value between 0 and 1 to set the WHO target coverage. Default is 0.75.
 #' @param target_text A string denoting the text that describes the target. Default is `WHO\nminimun target`.
 #'   Note the `\n` serves to make a new line in the legend text (see output).
 #' @param theme_object A ggplot theme object (e.g. theme_classic()) for the plots. Defaults is NA.
@@ -85,7 +85,6 @@ make_overall_plot_df <- function(survey_estimates, reported_df){
 #'   `{make_overall_plot output}[[{name of the particular plot}]]`.
 #'
 #' @importFrom magrittr %>%
-#' @rdname make_overall_plot_df
 #' @export
 make_overall_plot <- function(overall_plot_df, target = 0.75,
                               target_text = "WHO\nminimum target",

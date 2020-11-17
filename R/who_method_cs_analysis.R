@@ -1,3 +1,5 @@
+#' Calculate CES estimates
+#'
 #' A function to obtain binary var (e.g., coverage: yes / no) estimates with CI from WHO method CS clean data.
 #'
 #' @param var A string denoting the name of the variable to analyse.
@@ -167,7 +169,7 @@ evaluate_df <- function(df){
 
   if ("1_SAC" %in% survey_groups){ # Evaluate child attendance variable only if there are kids in the survey
     if (!any(0:1 %in% unique(stats::na.omit(df$ind_child_attend_bin)))) {
-      stop(sprintf("The function assumes var ind_child_attend_bin is coded as 0 for males, 1 for females. Currently, var ind_child_attend_bin has answers: %s",
+      stop(sprintf("The function assumes var ind_child_attend_bin is coded as 0 for non attending, 1 for attending. Currently, var ind_child_attend_bin has answers: %s",
                    paste(unique(stats::na.omit(df$ind_child_attend_bin)), collapse = ", ")))
     }
   }

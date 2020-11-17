@@ -1,3 +1,5 @@
+#' Calculate CES p values
+#'
 #' A function to calculate the p values of differences between sexes and attend/non-attend SAC.
 #'
 #' @param drug_name The three letter code for the drug (e.g., pzq, alb, ...). In quotes.
@@ -132,7 +134,7 @@ evaluate_data <- function(data){
 
   if ("1_SAC" %in% survey_groups){ # Evaluate child attendance variable only if there are kids in the survey
     if (!any(0:1 %in% unique(stats::na.omit(data$ind_child_attend_bin)))) {
-      stop(sprintf("The function assumes var ind_child_attend_bin is coded as 0 for males, 1 for females. Currently, var ind_child_attend_bin has answers: %s",
+      stop(sprintf("The function assumes var ind_child_attend_bin is coded as 0 for non attending, 1 for attending. Currently, var ind_child_attend_bin has answers: %s",
                    paste(unique(stats::na.omit(data$ind_child_attend_bin)), collapse = ", ")))
     }
   }

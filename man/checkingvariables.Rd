@@ -2,7 +2,7 @@
 % Please edit documentation in R/cleaning_check.R
 \name{checkingvariables}
 \alias{checkingvariables}
-\title{Function showing a summary of the variable and the number of missings for data cleaning}
+\title{Cleaning checks}
 \usage{
 checkingvariables(data, variable, tosplitby, makefactor = NA)
 }

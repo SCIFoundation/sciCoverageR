@@ -2,7 +2,7 @@
 % Please edit documentation in R/equity_calc.R
 \name{equity_calculation}
 \alias{equity_calculation}
-\title{A function}
+\title{Equity calcualtion}
 \usage{
 equity_calculation(data, vectorOfQuintiles, equity_file)
 }
@@ -17,5 +17,5 @@ equity_calculation(data, vectorOfQuintiles, equity_file)
 A data frame containing the equity scores and the equity quintiles for each household of data (first parameter)
 }
 \description{
-A function
+A function to calculate the equity values based on teh Equity Tool values.
 }

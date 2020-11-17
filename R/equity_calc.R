@@ -1,4 +1,6 @@
-#' A function
+#' Equity calcualtion
+#'
+#' A function to calculate the equity values based on teh Equity Tool values.
 #'
 #' @param data A data frame of HHs (more details)
 #' @param vectorOfQuintiles A vector (more details)
