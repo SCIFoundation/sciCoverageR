@@ -164,13 +164,13 @@ rr_table <- function(cs_values_output, p_values_output, rr_summary_output){
     cvo %>% dplyr::filter(item == "overall"))
 
   rr_attend_block <- dplyr::bind_rows(
-    a = rso %>% dplyr::filter(item == "attendance"),
+    a = rso %>% dplyr::filter(item == "attendance_pct"),
     b = cvo %>% dplyr::filter(item %in% c("attending", "non attending")),
     b = pvo %>% dplyr::filter(item == "p_diff_att"), .id = "block") %>%
     dplyr::arrange(block, drug, dplyr::desc(question)) %>% dplyr::select(-block)
 
   rr_sex_block <- dplyr::bind_rows(
-    a = rso %>% dplyr::filter(item == "girls"),
+    a = rso %>% dplyr::filter(item == "girls_pct"),
     b = cvo %>% dplyr::filter(item %in% c("Female", "Male")),
     b = pvo %>% dplyr::filter(item == "p_diff_sex"), .id = "block")  %>%
     dplyr::arrange(block, drug, dplyr::desc(question)) %>% dplyr::select(-block)
