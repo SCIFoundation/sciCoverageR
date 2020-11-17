@@ -153,7 +153,7 @@ rr_table <- function(cs_values_output, p_values_output, rr_summary_output){
 
   rso <- dplyr::bind_cols(m)
   rso$question <- NA # Add so column is present, same place
-  dplyr::select(1:3,tidyselect::last_col(), tidyselect::everything()) # Order same as others
+  rso <- rso %>% dplyr::select(1:3,tidyselect::last_col(), tidyselect::everything()) # Order same as others
 
   #==============================================#
   # Make unified for RR
