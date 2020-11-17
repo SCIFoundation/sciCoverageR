@@ -33,10 +33,12 @@ rr_summary <- function(partition, data){
         dplyr::filter(!is.na(ind_consent_bin) & !is.na(!!rlang::sym(swallow_vars[k]))) %>%
         dplyr::summarise(n_segments = dplyr::n_distinct(segment_name),
                          n_individuals = dplyr::n_distinct(ind_code),
-                         attendance = mean(ind_child_attend_bin, na.rm = T)*100,
-                         attendance = ifelse(is.nan(attendance), NA, sprintf("%.1f%%", attendance)),
-                         girls = sum(ind_sex == "2_Female", na.rm = T),
-                         girls = sprintf("%.1f%%", (girls/n_individuals)*100))
+                         attendance_count = sum(ind_child_attend_bin, na.rm = T),
+                         attendance_pct = mean(ind_child_attend_bin, na.rm = T)*100,
+                         attendance_pct = ifelse(is.nan(attendance_pct), NA,
+                                                 sprintf("%.1f%%", attendance_pct)),
+                         girls_count = sum(ind_sex == "2_Female", na.rm = T),
+                         girls_pct = sprintf("%.1f%%", (girls_count/n_individuals)*100))
       summary_output[[toupper(present_vars[k])]] <- h
 
     }
@@ -135,7 +137,7 @@ rr_table <- function(cs_values_output, p_values_output, rr_summary_output){
   #==============================================#
 
   t <- rr_summary_output %>%
-    tidyr:: pivot_wider(names_from = partition, names_glue = "{partition} {.value}", values_from = n_segments:girls)
+    tidyr:: pivot_wider(names_from = partition, names_glue = "{partition} {.value}", values_from = n_segments:girls_pct)
 
   m <- list()
   for (part in unique(rr_summary_output$partition)){
@@ -151,7 +153,7 @@ rr_table <- function(cs_values_output, p_values_output, rr_summary_output){
 
   rso <- dplyr::bind_cols(m)
   rso$question <- NA # Add so column is present, same place
-  rso <- rso %>% dplyr::select(1:3,8,4:7) # Order same as others
+  dplyr::select(1:3,tidyselect::last_col(), tidyselect::everything()) # Order same as others
 
   #==============================================#
   # Make unified for RR

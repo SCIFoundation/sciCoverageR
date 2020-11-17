@@ -2,8 +2,7 @@
 % Please edit documentation in R/attendance_df_plots.R
 \name{make_attendance_plot}
 \alias{make_attendance_plot}
-\title{A function to make the plot dissagregated by attendance for dashboards from the \code{estimate_cs_values} output.
-.}
+\title{CES attendance plot}
 \usage{
 make_attendance_plot(
   survey_estimates,

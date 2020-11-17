@@ -2,7 +2,7 @@
 % Please edit documentation in R/sex_df_plots.R
 \name{make_sex_plot}
 \alias{make_sex_plot}
-\title{A function to make the plot dissagregated by sex for dashboards from the \code{estimate_cs_values} output.}
+\title{CES sex plot}
 \usage{
 make_sex_plot(
   survey_estimates,
@@ -12,7 +12,7 @@ make_sex_plot(
   y_axis_label_reach = "Programme Reach (in \%)\\n",
   y_axis_label_coverage = "Survey Coverage (in \%)\\n",
   x_axis_label = "\\nImplementation Unit",
-  sex_group_names = c("Boys, Men", "Girls", "Women"),
+  sex_group_names = c("Boys", "Men", "Girls", "Women"),
   survey_point_shape = 16,
   survey_point_size = 4,
   nrow_guide = NA

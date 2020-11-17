@@ -4,7 +4,7 @@
 \alias{make_overall_plot_df}
 \alias{make_overall_plot}
 \alias{make_sci_theme}
-\title{A function to make a data frame to use for plotting for the overall cases (not disaggregated by sex or attend).}
+\title{CES Overall plot data frame}
 \usage{
 make_overall_plot_df(survey_estimates, reported_df)
 
@@ -71,5 +71,9 @@ A list of plots. Run names({make_overall_plot output}) to see them. Call them in
 \verb{\{make_overall_plot output\}[[\{name of the particular plot\}]]}.
 }
 \description{
+A function to make a data frame to use for plotting for the overall cases (not disaggregated by sex or attend).
+
+A function to make the overrall plot for dashboards with the \code{make_overall_plot_df} output.
+
 Function to make SCI theme for plots if none passed to \code{make_overall_plot}.
 }
