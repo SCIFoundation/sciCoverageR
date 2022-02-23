@@ -12,12 +12,13 @@
 #' @export
 equity_calculation <- function(data, vectorOfQuintiles, equity_file){
 
+
   # Amended Equity Tool response data frame
-  df <- dplyr::bind_rows(equity_file %>% dplyr::select(1, answer = 2, score = 3),
-                         equity_file %>% dplyr::select(1, answer = 4, score = 5),
-                         equity_file %>% dplyr::select(1, answer = 6, score = 7)) %>%
-    stats::na.omit()
-  names(df) <- c("question", "answer", "score")
+  df <- equity_tool %>%
+    pivot_longer(!qns, names_to = c(".value", "set"),  names_pattern = "(op|score)([0-9])",
+                 values_drop_na = T) %>%
+    select(question = qns, answer = op, score)
+
   df$code <- paste(df$question, df$answer, sep = " : ")
 
   # Compare equity df from survey to values and options
