@@ -150,7 +150,6 @@ multipleChoicePlot <- function(data, var2work, firstLevelDisaggregation, secondL
                 plotData.first = summary_long_avg, plotData.second = summary_long))
 }
 
-
 #' Converting a string to first letter capitalised, all other letters little.
 #'
 #' This function does the same as the Excel function PROPER(string)
