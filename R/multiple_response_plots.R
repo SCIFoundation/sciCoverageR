@@ -37,14 +37,14 @@ multipleChoicePlot <- function(data, var2work, firstLevelDisaggregation, secondL
   data <- cbind(data, listDF)
   data <- data[,append(c(firstLevelDisaggregation,secondLevelDisaggregation),names(listOptions))]
 
-  #### Step 2 - Create DFs divided by first and second level disaggregation (long) and first level only (long_avg) ####
-  data2 <- data %>% group_by_(.dots = c(firstLevelDisaggregation,secondLevelDisaggregation)) %>% summarise_all(funs(mean))
+  #### Step 2 - Create DFs divided by first and second level disaggregation (long) and first level onlyu (long_avg) ####
+  data2 <- data %>% group_by(across(all_of(c(firstLevelDisaggregation,secondLevelDisaggregation)))) %>% summarise_all(funs(mean))
 
   data_long <- gather(data2, type, proportion, names(listOptions), factor_key=TRUE)
   data_long$type <- gsub(var2work,"",data_long$type)
   if (length(labels) ==0) data_long$type <- proper(data_long$type)
 
-  data3 <- data %>% select_(sprintf("-%s",secondLevelDisaggregation)) %>% group_by_(firstLevelDisaggregation) %>%
+  data3 <- data %>% select_(sprintf("-%s",secondLevelDisaggregation)) %>% group_by(.data[[firstLevelDisaggregation]]) %>%
     summarise_all(funs(mean))
   data_long_avg <- gather(data3, type, proportion, names(listOptions), factor_key=TRUE)
   data_long_avg$type <- gsub(var2work,"",data_long_avg$type)
@@ -53,7 +53,7 @@ multipleChoicePlot <- function(data, var2work, firstLevelDisaggregation, secondL
   #### Step 3 - Reduce summaries to threshold levels for graphs ####
   dfGraph <- data
   overviewDF <- dfGraph %>% select(append(firstLevelDisaggregation, names(listOptions))) %>%
-    group_by_(firstLevelDisaggregation) %>% summarise_all(funs(mean))
+    group_by(.data[[firstLevelDisaggregation]]) %>% summarise_all(funs(mean))
 
   keeper <- names(listOptions)[map_dbl(overviewDF[,-1],max) > thresholdInclude]
 
@@ -77,7 +77,7 @@ multipleChoicePlot <- function(data, var2work, firstLevelDisaggregation, secondL
   dfGraph <- dfGraph[,append(c(firstLevelDisaggregation,secondLevelDisaggregation),keeper)]
 
 
-  dfGraph2 <- dfGraph %>% group_by_(.dots = c(firstLevelDisaggregation,secondLevelDisaggregation)) %>%
+  dfGraph2 <- dfGraph %>% group_by(across(all_of(c(firstLevelDisaggregation,secondLevelDisaggregation)))) %>%
     summarise_all(funs(mean))
 
   summary_long <- gather(dfGraph2, type, proportion, keeper, factor_key=TRUE)
@@ -86,7 +86,7 @@ multipleChoicePlot <- function(data, var2work, firstLevelDisaggregation, secondL
 
   if (splittr) summary_long$type <- gsub(" ","\n",summary_long$type)
 
-  dfGraph3 <- dfGraph %>% select_(sprintf("-%s",secondLevelDisaggregation)) %>% group_by_(firstLevelDisaggregation) %>%
+  dfGraph3 <- dfGraph %>% select_(sprintf("-%s",secondLevelDisaggregation)) %>% group_by(.data[[firstLevelDisaggregation]]) %>%
     summarise_all(funs(mean))
 
   summary_long_avg <- gather(dfGraph3, type, proportion, keeper, factor_key=TRUE)
@@ -149,4 +149,34 @@ multipleChoicePlot <- function(data, var2work, firstLevelDisaggregation, secondL
   return( list (plot = p, data.second = data_long, data.first = data_long_avg,
                 plotData.first = summary_long_avg, plotData.second = summary_long))
 }
+
+#' Converting a string to first letter capitalised, all other letters little.
+#'
+#' This function does the same as the Excel function PROPER(string)
+#'
+#' @param x A character vector
+#' @param type String, either 'excel' or 'cto'
+#'
+#' @return The same character vector but every letter at the beginning of after a blank is capitalised.
+#' If type = 'cto' also the two digits and all underscores are removed
+#' @examples
+#' proper(c("wOrds", "many words", "verymany many Words"))
+#' [1] "Words"               "Many Words"          "Verymany Many Words"
+#'
+#' proper(c( "01_farmer",  "02_merchant", "03_health_worker"))
+#' [1] "Farmer"        "Merchant"      "Health Worker"
+#'
+#' @export
+proper <- function(x, type = "cto") {
+
+  if(type == "cto") {
+    #x <- gsub('[0-9][0-9]_', '', x)
+    x <- gsub('[0-9]+_', '', x)
+    x <- gsub('_', ' ', x)
+  }
+  out <- gsub("(?<=\\b)([a-z])", "\\U\\1", tolower(x), perl=TRUE)
+  out
+
+
+} # end proper
 
