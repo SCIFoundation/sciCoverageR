@@ -34,6 +34,7 @@ formultipleplot <- function(data,..., out){
     inner_join(., data %>% group_by(...) %>%
                  count({{out}}) %>%summarise(Total=sum(n))) %>%
     mutate(perc = n/Total*100) %>%
-    arrange(desc(perc)) %>% ungroup()
+    arrange(desc(perc)) %>% ungroup() %>%
+    mutate(name = forcats::fct_inorder(name))
 
 }

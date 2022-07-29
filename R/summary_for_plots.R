@@ -18,6 +18,6 @@ forplot <- function(data, ..., out,dropna = c(FALSE,TRUE)){
            perc=n/Total*100) %>%
     arrange(desc(perc)) %>% ungroup() %>%
 
-    {if(is.factor(.%>% select({{out}}))) mutate({{out}}:=forcats::fct_inorder(as.factor({{out}}))) else . }
+    purrr::when(is.factor(pull(.,{{out}}))  ~ mutate(., {{out}} := forcats::fct_inorder({{out}})), ~ .)
 
 }
