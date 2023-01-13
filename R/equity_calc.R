@@ -14,7 +14,7 @@ equity_calculation <- function(data, vectorOfQuintiles, equity_file){
 
 
   # Amended Equity Tool response data frame
-  df <- equity_tool %>%
+  df <- equity_file %>%
     pivot_longer(!qns, names_to = c(".value", "set"),  names_pattern = "(op|score)([0-9])",
                  values_drop_na = T) %>%
     select(question = qns, answer = op, score)
