@@ -35,6 +35,7 @@ formultipleplot <- function(data,..., out){
                  count({{out}}) %>%summarise(Total=sum(n))) %>%
     mutate(perc = n/Total*100) %>%
     arrange(desc(perc)) %>% ungroup() %>%
-    mutate(name = forcats::fct_inorder(name))
+    mutate(name = forcats::fct_inorder(name)) %>%
+    filter(perc!=0)
 
 }
