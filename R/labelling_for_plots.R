@@ -1,3 +1,5 @@
+#' Label variables for graphs
+#'
 #' Function for converting variable values to labels suitable for reporting and graphs.
 #' It replaces all underscores with whitespaces and fixes whitespaces,
 #' removes numbering options at the start of the string,

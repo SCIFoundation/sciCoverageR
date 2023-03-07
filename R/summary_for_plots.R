@@ -1,3 +1,5 @@
+#' Summarise a 'select one' variable for plotting
+#'
 #' Function to summarise variables from CES and prepare for plotting
 #'
 #' @param data A dataframe containing grouping variables and outcome variable

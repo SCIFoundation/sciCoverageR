@@ -1,3 +1,5 @@
+#' Shift legend to empty space
+#'
 #' Function to shift legends into empty facets of a ggplot2 object
 #' Ownership of this specific function belongs to Z.Lin
 #' (Taken from https://stackoverflow.com/questions/54438495/shift-legend-into-empty-facets-of-a-faceted-plot-in-ggplot2)

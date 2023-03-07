@@ -1,3 +1,5 @@
+#' Translate variables to french
+#'
 #' Function for translating a fixed set of variables to french
 #'
 #' @param dataset A dataframe containing variable to be translated

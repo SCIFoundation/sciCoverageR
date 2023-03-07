@@ -1,5 +1,8 @@
 #' Custom Unlimit Health branded scale colour/fill function for ggplot2.
+<<<<<<< HEAD
 #'
+=======
+>>>>>>> 047a3507eb7ad031f6aeea72615a3aff8ad74bab
 #' Colours are assigned according to the order in the palette.
 #' If variable has more levels than specified in palette, colourRamp to generate additional colours matching the palette.
 #' The skip argument is optional but useful where some IUs are not treated
@@ -17,8 +20,33 @@
 #' @param skip A numeric vector. Index/Indices of colours in the palette to be skipped over.
 #' @param ... Other arguments passed on to ggplot2 scale function to control limits, breaks and labels etc.
 #'
+<<<<<<< HEAD
 #' @return A grob object to be plotted using grid.draw()
 
+=======
+#' @examples  scale_color_uh(palette="main",skip = 3) skip is specified and the 3rd colour in the main palette will be skipped
+#' @export
+scale_color_uh <- function(palette = "all", discrete = TRUE, reverse = FALSE, skip,...) {
+  pal <- uh_pal(palette = palette, reverse = reverse,skip)
+
+  if (discrete) {
+    discrete_scale("colour", paste0("uh_", palette), palette = pal, ...)
+  } else {
+    scale_color_gradientn(colours = pal(256), ...)
+  }
+}
+
+#' @export
+scale_fill_uh <- function(palette = "all", discrete = TRUE, reverse = FALSE, skip,...) {
+  pal <- uh_pal(palette = palette, reverse = reverse, skip)
+
+  if (discrete) {
+    discrete_scale("fill", paste0("uh_", palette), palette = pal, ...)
+  } else {
+    scale_fill_gradientn(colours = pal(256), ...)
+  }
+}
+>>>>>>> 047a3507eb7ad031f6aeea72615a3aff8ad74bab
 
 #' list of Unlimit Health colours
 uh_colours <- c(
@@ -86,6 +114,7 @@ uh_pal <- function(palette = "all", reverse = FALSE, skip,...) {
   }
 }
 
+<<<<<<< HEAD
 #' @export
 #'
 #' @examples  scale_color_uh(palette="main",skip = 3) skip is specified and the 3rd colour in the main palette will be skipped
@@ -113,3 +142,5 @@ scale_fill_uh <- function(palette = "all", discrete = TRUE, reverse = FALSE, ski
 }
 
 
+=======
+>>>>>>> 047a3507eb7ad031f6aeea72615a3aff8ad74bab

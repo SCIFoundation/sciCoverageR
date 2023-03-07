@@ -1,3 +1,5 @@
+#' Summarise a 'select multiple' variable for plotting
+#'
 #' Function to summarise variable that allows multiple responses from CES and prepare for plotting
 #'
 #' @param A dataframe containing grouping variables and outcome variable
