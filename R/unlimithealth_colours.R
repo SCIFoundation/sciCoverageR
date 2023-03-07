@@ -17,7 +17,7 @@
 #' @param skip A numeric vector. Index/Indices of colours in the palette to be skipped over.
 #' @param ... Other arguments passed on to ggplot2 scale function to control limits, breaks and labels etc.
 #'
-#' @return A grob object to be plotted using grid.draw()
+#' @return
 #' @examples  scale_color_uh(palette="main",skip = 3) skip is specified and the 3rd colour in the main palette will be skipped
 #'
 #' @noRD
@@ -91,6 +91,7 @@ uh_pal <- function(palette = "all", reverse = FALSE, skip,...) {
 }
 
 
+
 #' @export
 scale_color_uh <- function(palette = "all", discrete = TRUE, reverse = FALSE, skip,...) {
   pal <- uh_pal(palette = palette, reverse = reverse,skip)
@@ -101,6 +102,7 @@ scale_color_uh <- function(palette = "all", discrete = TRUE, reverse = FALSE, sk
     scale_color_gradientn(colours = pal(256), ...)
   }
 }
+
 
 
 #' @rdname scale_color_uh
