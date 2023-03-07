@@ -1,8 +1,5 @@
 #' Custom Unlimit Health branded scale colour/fill function for ggplot2.
-<<<<<<< HEAD
 #'
-=======
->>>>>>> 047a3507eb7ad031f6aeea72615a3aff8ad74bab
 #' Colours are assigned according to the order in the palette.
 #' If variable has more levels than specified in palette, colourRamp to generate additional colours matching the palette.
 #' The skip argument is optional but useful where some IUs are not treated
@@ -20,34 +17,10 @@
 #' @param skip A numeric vector. Index/Indices of colours in the palette to be skipped over.
 #' @param ... Other arguments passed on to ggplot2 scale function to control limits, breaks and labels etc.
 #'
-<<<<<<< HEAD
 #' @return A grob object to be plotted using grid.draw()
-
-=======
 #' @examples  scale_color_uh(palette="main",skip = 3) skip is specified and the 3rd colour in the main palette will be skipped
-#' @export
-scale_color_uh <- function(palette = "all", discrete = TRUE, reverse = FALSE, skip,...) {
-  pal <- uh_pal(palette = palette, reverse = reverse,skip)
-
-  if (discrete) {
-    discrete_scale("colour", paste0("uh_", palette), palette = pal, ...)
-  } else {
-    scale_color_gradientn(colours = pal(256), ...)
-  }
-}
-
-#' @export
-scale_fill_uh <- function(palette = "all", discrete = TRUE, reverse = FALSE, skip,...) {
-  pal <- uh_pal(palette = palette, reverse = reverse, skip)
-
-  if (discrete) {
-    discrete_scale("fill", paste0("uh_", palette), palette = pal, ...)
-  } else {
-    scale_fill_gradientn(colours = pal(256), ...)
-  }
-}
->>>>>>> 047a3507eb7ad031f6aeea72615a3aff8ad74bab
-
+#'
+#' @noRD
 #' list of Unlimit Health colours
 uh_colours <- c(
   # primary palette
@@ -67,6 +40,7 @@ uh_colours <- c(
   `lilac`         = "#ae84bb",
   `fresh fields`  = "#b8a831")
 
+#' @noRD
 #' This returns colours in the colour list above as hex codes
 uh_cols <- function(...) {
   cols <- c(...)
@@ -77,6 +51,7 @@ uh_cols <- function(...) {
   uh_colours[cols]
 }
 
+#' @noRD internal
 #' Define palettes
 uh_palettes <- list(
   `all`           = uh_cols("dark blue", "clean blue", "neutral", "red earth", "deep aqua","soft purple",
@@ -91,6 +66,7 @@ uh_palettes <- list(
   `gender`        = uh_cols("red earth", "deep aqua")
 )
 
+#' @noRD
 #' palette function
 uh_pal <- function(palette = "all", reverse = FALSE, skip,...) {
 
@@ -114,11 +90,8 @@ uh_pal <- function(palette = "all", reverse = FALSE, skip,...) {
   }
 }
 
-<<<<<<< HEAD
+
 #' @export
-#'
-#' @examples  scale_color_uh(palette="main",skip = 3) skip is specified and the 3rd colour in the main palette will be skipped
-#' @rdname scale_color_uh
 scale_color_uh <- function(palette = "all", discrete = TRUE, reverse = FALSE, skip,...) {
   pal <- uh_pal(palette = palette, reverse = reverse,skip)
 
@@ -129,8 +102,8 @@ scale_color_uh <- function(palette = "all", discrete = TRUE, reverse = FALSE, sk
   }
 }
 
-#' @rdname scale_fill_uh
-#' @export
+
+#' @rdname scale_color_uh
 scale_fill_uh <- function(palette = "all", discrete = TRUE, reverse = FALSE, skip,...) {
   pal <- uh_pal(palette = palette, reverse = reverse, skip)
 
@@ -141,6 +114,3 @@ scale_fill_uh <- function(palette = "all", discrete = TRUE, reverse = FALSE, ski
   }
 }
 
-
-=======
->>>>>>> 047a3507eb7ad031f6aeea72615a3aff8ad74bab
