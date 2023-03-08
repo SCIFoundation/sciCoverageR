@@ -2,11 +2,7 @@
 % Please edit documentation in R/shift_legend.R
 \name{shift_legend}
 \alias{shift_legend}
-\title{Function to shift legends into empty facets of a ggplot2 object
-Ownership of this specific function belongs to Z.Lin
-(Taken from https://stackoverflow.com/questions/54438495/shift-legend-into-empty-facets-of-a-faceted-plot-in-ggplot2)
-As far as the authors of this package are aware, this specific function has not been published in a package.
-Therefore, to aid data visualisation for works by SCIF, this function is compiled into sciCoverageR.}
+\title{Shift legend to empty space}
 \usage{
 shift_legend(p)
 }

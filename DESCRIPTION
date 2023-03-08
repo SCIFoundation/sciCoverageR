@@ -1,6 +1,6 @@
 Package: sciCoverageR
 Title: Set of SCIF coverage survey functions
-Version: 0.0.0.9000
+Version: 0.1.0
 Authors@R: 
     person(given="Pancy",family="Poon",email="p.poon@schisto.org.uk",role = c("aut", "cre"))
     person(given="Mario", family="Gronert", email = "m.gronert@schisto.org.uk", role = c("aut","cre"))
@@ -10,7 +10,7 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.3
 Depends: 
     R (>= 2.10)
 Imports: 

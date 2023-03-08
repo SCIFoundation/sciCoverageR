@@ -2,7 +2,7 @@
 % Please edit documentation in R/summary_for_plots.R
 \name{forplot}
 \alias{forplot}
-\title{Function to summarise variables from CES and prepare for plotting}
+\title{Summarise a 'select one' variable for plotting}
 \usage{
 forplot(data, ..., out, dropna = c(FALSE, TRUE))
 }

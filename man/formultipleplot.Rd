@@ -2,7 +2,7 @@
 % Please edit documentation in R/summary_for_multiple_response_plots.R
 \name{formultipleplot}
 \alias{formultipleplot}
-\title{Function to summarise variable that allows multiple responses from CES and prepare for plotting}
+\title{Summarise a 'select multiple' variable for plotting}
 \usage{
 formultipleplot(data, ..., out)
 }
