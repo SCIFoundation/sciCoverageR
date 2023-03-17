@@ -100,7 +100,7 @@ uh_pal <- function(palette = "all", reverse = FALSE, skip,...) {
 #' @examples  scale_color_uh(palette="main",skip = 3) skip is specified and the 3rd colour in the main palette will be skipped
 #'
 #' @export
-scale_color_uh <- function(palette = "all", discrete = TRUE, reverse = FALSE, skip,...) {
+scale_colour_uh <- function(palette = "all", discrete = TRUE, reverse = FALSE, skip,...) {
   pal <- uh_pal(palette = palette, reverse = reverse,skip)
 
   if (discrete) {
