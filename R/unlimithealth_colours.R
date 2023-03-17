@@ -97,10 +97,10 @@ uh_pal <- function(palette = "all", reverse = FALSE, skip,...) {
 #' @param ... Other arguments passed on to ggplot2 scale function to control limits, breaks and labels etc.
 #'
 #' @return
-#' @examples  scale_color_uh(palette="main",skip = 3) skip is specified and the 3rd colour in the main palette will be skipped
+#' @examples  scale_colour_uh(palette="main",skip = 3) skip is specified and the 3rd colour in the main palette will be skipped
 #'
 #' @export
-scale_colour_uh <- function(palette = "all", discrete = TRUE, reverse = FALSE, skip,...) {
+scale_color_uh <- function(palette = "all", discrete = TRUE, reverse = FALSE, skip,...) {
   pal <- uh_pal(palette = palette, reverse = reverse,skip)
 
   if (discrete) {
@@ -109,6 +109,10 @@ scale_colour_uh <- function(palette = "all", discrete = TRUE, reverse = FALSE, s
     scale_color_gradientn(colours = pal(256), ...)
   }
 }
+
+#' @rdname scale_color_uh
+#' @export
+scale_colour_uh <- scale_color_uh
 
 
 
