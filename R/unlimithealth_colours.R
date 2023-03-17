@@ -111,6 +111,7 @@ scale_color_uh <- function(palette = "all", discrete = TRUE, reverse = FALSE, sk
 }
 
 #' @rdname scale_color_uh
+#' @aliases scale_color_uh
 #' @export
 scale_colour_uh <- scale_color_uh
 
