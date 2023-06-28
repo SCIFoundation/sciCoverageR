@@ -29,8 +29,7 @@ Imports:
     scales,
     tidyselect,
     cowplot,
-    gtable,
-    grid
+    gtable
 Suggests: 
     knitr,
     rmarkdown,
