@@ -224,6 +224,7 @@ tofrench <- function(dataset,which=c("sens_how","treatment_info","resist","benef
                                                             grepl("unknown", {{var}}, ignore.case = T) ~"Ne sait pas",
                                                             grepl("yes.*first", {{var}}, ignore.case = T) ~"Oui, première fois",
                                                             grepl("yes.*second", {{var}}, ignore.case = T) ~"Oui deuxième fois",
+                                                            grepl("some", {{var}}, ignore.case = T) ~"Certains pas tous",
                                                             TRUE ~ as.character({{var}}))) )
   }
   else if(which=="gender"){
