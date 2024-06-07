@@ -52,7 +52,8 @@ shift_legend <- function(p){
   names(empty.facet.panels) <- c("t", "l", "b", "r")
 
   # extract legend & copy over to location of unfilled facet panels
-  guide.grob <- which(gp[["layout"]][["name"]] == "guide-box")
+  all_guidebox <- c("guide-box-right","guide-box-left","guide-box-bottom","guide-box-top","guide-box-inside")
+  guide.grob <- which(gp[["layout"]][["name"]] %in% all_guidebox)[1]
   if(length(guide.grob) == 0){
     message("There is no legend present. Returning original plot.")
     return(p)
@@ -74,7 +75,7 @@ shift_legend <- function(p){
   if(guide.grob[["t"]] == guide.grob[["b"]]){
     gp <- gtable_squash_rows(gp, rows = guide.grob[["t"]])
   }
-  gp <- gtable_remove_grobs(gp, "guide-box")
+  gp <- gtable_remove_grobs(gp, all_guidebox)
 
   return(gp)
 }
