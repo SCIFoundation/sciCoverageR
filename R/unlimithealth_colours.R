@@ -4,6 +4,9 @@
 #' If variable has more levels than specified in palette, colourRamp to generate additional colours matching the palette.
 #' The skip argument is optional but useful where some IUs are not treated
 #'
+#' @name unlimithealth_colours
+NULL
+#> NULL
 #' list of Unlimit Health colours
 uh_colours <- c(
   # primary palette
@@ -25,7 +28,8 @@ uh_colours <- c(
 
 #' This returns colours in the colour list above as hex codes
 #' @param ... Names of uh_colours
-#' @export
+#' @rdname unlimithealth_colours
+#' @export uh_cols
 uh_cols <- function(...) {
   cols <- c(...)
 
@@ -36,7 +40,7 @@ uh_cols <- function(...) {
 }
 
 #' Define palettes
-#' @rdname uh_cols
+#' @rdname unlimithealth_colours
 #' @export
 uh_palettes <- list(
   `all`           = uh_cols("dark blue", "clean blue", "neutral", "red earth", "deep aqua","soft purple",
@@ -59,7 +63,7 @@ uh_palettes <- list(
 #'
 #' @examples
 #' uh_pal(palette= "primary")(2)
-#' @rdname uh_cols
+#' @rdname unlimithealth_colours
 #' @export
 uh_pal <- function(palette = "all", reverse = FALSE, skip,...) {
 
@@ -100,7 +104,7 @@ uh_pal <- function(palette = "all", reverse = FALSE, skip,...) {
 #' @return
 #' @examples  scale_colour_uh(palette="main",skip = 3) skip is specified and the 3rd colour in the main palette will be skipped
 #'
-#' @rdname uh_cols
+#' @rdname unlimithealth_colours
 #' @export
 scale_color_uh <- function(palette = "all", discrete = TRUE, reverse = FALSE, skip,...) {
   pal <- uh_pal(palette = palette, reverse = reverse,skip)
@@ -112,14 +116,14 @@ scale_color_uh <- function(palette = "all", discrete = TRUE, reverse = FALSE, sk
   }
 }
 
-#' @rdname uh_cols
+#' @rdname unlimithealth_colours
 #' @aliases scale_color_uh
 #' @export
 scale_colour_uh <- scale_color_uh
 
 
 
-#' @rdname uh_cols
+#' @rdname unlimithealth_colours
 #' @export
 scale_fill_uh <- function(palette = "all", discrete = TRUE, reverse = FALSE, skip,...) {
   pal <- uh_pal(palette = palette, reverse = reverse, skip)
