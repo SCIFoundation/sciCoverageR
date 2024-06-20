@@ -26,7 +26,7 @@ uh_colours <- c(
 
 #' This returns colours in the colour list above as hex codes
 #' @param ... Names of uh_colours
-#' @keywords internal
+#' @export
 uh_cols <- function(...) {
   cols <- c(...)
 
@@ -37,7 +37,8 @@ uh_cols <- function(...) {
 }
 
 #' Define palettes
-#' @keywords internal
+#' @rdname uh_cols
+#' @export
 uh_palettes <- list(
   `all`           = uh_cols("dark blue", "clean blue", "neutral", "red earth", "deep aqua","soft purple",
                             "leaf green", "sunshine", "teal", "lilac", "fresh fields"),
@@ -59,7 +60,8 @@ uh_palettes <- list(
 #'
 #' @examples
 #' uh_pal(palette= "primary")(2)
-#' @keywords internal
+#' @rdname uh_cols
+#' @export
 uh_pal <- function(palette = "all", reverse = FALSE, skip,...) {
 
   pal <- uh_palettes[[palette]]
@@ -99,6 +101,7 @@ uh_pal <- function(palette = "all", reverse = FALSE, skip,...) {
 #' @return
 #' @examples  scale_colour_uh(palette="main",skip = 3) skip is specified and the 3rd colour in the main palette will be skipped
 #'
+#' @rdname uh_cols
 #' @export
 scale_color_uh <- function(palette = "all", discrete = TRUE, reverse = FALSE, skip,...) {
   pal <- uh_pal(palette = palette, reverse = reverse,skip)
@@ -110,14 +113,14 @@ scale_color_uh <- function(palette = "all", discrete = TRUE, reverse = FALSE, sk
   }
 }
 
-#' @rdname scale_color_uh
+#' @rdname uh_cols
 #' @aliases scale_color_uh
 #' @export
 scale_colour_uh <- scale_color_uh
 
 
 
-#' @rdname scale_color_uh
+#' @rdname uh_cols
 #' @export
 scale_fill_uh <- function(palette = "all", discrete = TRUE, reverse = FALSE, skip,...) {
   pal <- uh_pal(palette = palette, reverse = reverse, skip)
