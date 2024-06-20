@@ -5,7 +5,6 @@
 #' The skip argument is optional but useful where some IUs are not treated
 #'
 #' list of Unlimit Health colours
-#' @keywords internal
 uh_colours <- c(
   # primary palette
   `dark blue`     = "#003654",
