@@ -3,7 +3,7 @@
 \docType{data}
 \name{uh_colours}
 \alias{uh_colours}
-\title{Custom Unlimit Health branded scale colour/fill function for ggplot2.}
+\title{list of Unlimit Health colours}
 \format{
 An object of class \code{character} of length 11.
 }
@@ -11,11 +11,6 @@ An object of class \code{character} of length 11.
 uh_colours
 }
 \description{
-Colours are assigned according to the order in the palette.
-If variable has more levels than specified in palette, colourRamp to generate additional colours matching the palette.
-The skip argument is optional but useful where some IUs are not treated
-}
-\details{
 list of Unlimit Health colours
 }
-\keyword{internal}
+\keyword{datasets}

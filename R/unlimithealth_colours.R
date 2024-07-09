@@ -29,7 +29,7 @@ uh_colours <- c(
 #' This returns colours in the colour list above as hex codes
 #' @param ... Names of uh_colours
 #' @rdname unlimithealth_colours
-#' @export uh_cols
+#' @export
 uh_cols <- function(...) {
   cols <- c(...)
 
@@ -61,8 +61,7 @@ uh_palettes <- list(
 #' @param reverse Reserve the direction of the palette? Default is FALSE.
 #' @param ... Additional arguments to pass to colorRampPalette()
 #'
-#' @examples
-#' uh_pal(palette= "primary")(2)
+#' @examples uh_pal(palette= "primary")(2)
 #' @rdname unlimithealth_colours
 #' @export
 uh_pal <- function(palette = "all", reverse = FALSE, skip,...) {
@@ -101,7 +100,6 @@ uh_pal <- function(palette = "all", reverse = FALSE, skip,...) {
 #' @param skip A numeric vector. Index/Indices of colours in the palette to be skipped over.
 #' @param ... Other arguments passed on to ggplot2 scale function to control limits, breaks and labels etc.
 #'
-#' @return
 #' @examples  scale_colour_uh(palette="main",skip = 3) skip is specified and the 3rd colour in the main palette will be skipped
 #'
 #' @rdname unlimithealth_colours

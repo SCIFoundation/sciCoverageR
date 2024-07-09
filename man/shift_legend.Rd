@@ -24,6 +24,9 @@ library(ggplot2)
 myplot <- ggplot(diamonds, aes(x = carat, fill = cut)) +
 geom_density(position = "stack") +
 facet_wrap(~ color)
+3 libraries required for grid.draw
 library(grid)
+library(cowplot)
+library(gtable)
 grid.draw(shift_legend(myplot))
 }

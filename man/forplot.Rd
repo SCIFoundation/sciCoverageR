@@ -4,7 +4,7 @@
 \alias{forplot}
 \title{Summarise a 'select one' variable for plotting}
 \usage{
-forplot(data, ..., out, dropna = c(FALSE, TRUE))
+forplot(data, ..., out, dropna = c(FALSE, TRUE), number = c(FALSE, TRUE))
 }
 \arguments{
 \item{data}{A dataframe containing grouping variables and outcome variable}
@@ -14,6 +14,8 @@ forplot(data, ..., out, dropna = c(FALSE, TRUE))
 \item{out}{An outcome variable}
 
 \item{dropna}{Should NAs be dropped from dataframe?}
+
+\item{number}{Is the type of outcome variable numeric?}
 }
 \value{
 A summary tibble in long format for ggplot of n, total and percentage (n/total)
