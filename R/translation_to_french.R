@@ -36,7 +36,7 @@ tofrench <- function(dataset,which=c("sens_how","treatment_info","resist","benef
     dataset %>%
       mutate("{{var}}_fr" := forcats::fct_inorder(case_when(grepl("teacher", {{var}}, ignore.case = T) ~"Enseignant",
                                                             grepl("village.*meeting", {{var}}, ignore.case = T) ~"Réunion du village",
-                                                            grepl("posters", {{var}}, ignore.case = T) ~"Posters",
+                                                            grepl("posters", {{var}}, ignore.case = T) ~"Affiches",
                                                             grepl("health.*professional", {{var}}, ignore.case = T) ~"Professionnel de la santé",
                                                             grepl("newspaper", {{var}}, ignore.case = T) ~"Journal",
                                                             grepl("radio", {{var}}, ignore.case = T) ~"Radio",
@@ -229,8 +229,8 @@ tofrench <- function(dataset,which=c("sens_how","treatment_info","resist","benef
   }
   else if(which=="gender"){
     dataset %>%
-      mutate("{{var}}_fr" := forcats::fct_inorder(case_when(grepl("female|girl", {{var}}, ignore.case = T) ~"Femme",
-                                                            grepl("male|boy", {{var}}, ignore.case = T) ~"Homme",
+      mutate("{{var}}_fr" := forcats::fct_inorder(case_when(grepl("female|girl", {{var}}, ignore.case = T) ~"Féminin",
+                                                            grepl("male|boy", {{var}}, ignore.case = T) ~"Masculin",
                                                             TRUE ~ as.character({{var}}))) )
   }
   else if(which=="school"){
