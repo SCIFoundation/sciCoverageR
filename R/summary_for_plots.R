@@ -13,8 +13,12 @@
 #' @export
 #'
 forplot <- function(data, ..., out,dropna = c(FALSE,TRUE), number= c(FALSE,TRUE)){
-  dropna = assertive::use_first(dropna)
-  number= assertive::use_first(number)
+  if (missing(dropna)) dropna <- FALSE
+  else dropna <- dropna
+  if (missing(number)) number <- FALSE
+  else number <- number
+  #dropna = assertive::use_first(dropna) #assertive is deprecated
+  #number= assertive::use_first(number)
   data %>%  group_by(...) %>% count({{out}}) %>%
     {if(dropna==TRUE) drop_na(.)  else .} %>%
     mutate(Total=sum(n, na.rm=T),
